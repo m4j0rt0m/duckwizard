@@ -4,3 +4,6 @@
 [submodule "synthesis"]
 	path = synthesis
 	url = https://github.com/m4j0rt0m/rtl-develop-template-synthesis.git
+[submodule "simulation"]
+	path = simulation
+	url = https://github.com/m4j0rt0m/rtl-develop-template-simulation.git
