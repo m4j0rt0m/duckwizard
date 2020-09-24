@@ -6,6 +6,8 @@
 #   https://github.com/m4j0rt0m/rtl-develop-template              #
 ###################################################################
 
+SHELL                  := /bin/bash
+
 MKFILE_PATH             = $(abspath $(firstword $(MAKEFILE_LIST)))
 TOP_DIR                 = $(shell dirname $(MKFILE_PATH))
 
