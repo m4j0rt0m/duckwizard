@@ -7,6 +7,8 @@
 ###################################################################
 
 SHELL                  := /bin/bash
+REMOTE-URL-SSH         := git@github.com:m4j0rt0m/rtl-develop-template.git
+REMOTE-URL-HTTPS       := https://github.com/m4j0rt0m/rtl-develop-template.git
 
 MKFILE_PATH             = $(abspath $(firstword $(MAKEFILE_LIST)))
 TOP_DIR                 = $(shell dirname $(MKFILE_PATH))
@@ -241,12 +243,18 @@ clean-all: clean
 
 #H# init-repo           : Initialize repository (submodules)
 init-repo:
-	git submodule update --init --recursive
+	@git submodule update --init --recursive
 
 #H# rm-git-db           : Remove GIT databases (.git and .gitmodules)
 rm-git-db: init-repo
-	find . -name ".git"
-	find . -name ".gitmodules"
+	$(eval remote-url=$(shell git config --get remote.origin.url))
+	@echo $(remote-url);\
+	if [[ "$(remote-url)" == "$(REMOTE-URL-SSH)" ]] || [[ "$(remote-url)" == "$(REMOTE-URL-HTTPS)" ]] ; then\
+		find . -name ".git";\
+		find . -name ".gitmodules";\
+	else\
+	  echo -e "$(_error_)\n [ERROR] You are trying to delete your own project GIT database!$(_reset_)";\
+	fi
 
 #H# help                : Display help
 help: Makefile
