@@ -248,12 +248,11 @@ init-repo:
 #H# rm-git-db           : Remove GIT databases (.git and .gitmodules)
 rm-git-db: init-repo
 	$(eval remote-url=$(shell git config --get remote.origin.url))
-	@echo $(remote-url);\
-	if [[ "$(remote-url)" == "$(REMOTE-URL-SSH)" ]] || [[ "$(remote-url)" == "$(REMOTE-URL-HTTPS)" ]] ; then\
-		find . -name ".git";\
-		find . -name ".gitmodules";\
+	@if [[ "$(remote-url)" == "$(REMOTE-URL-SSH)" ]] || [[ "$(remote-url)" == "$(REMOTE-URL-HTTPS)" ]] ; then\
+		find . -name ".git" -delete;\
+		find . -name ".gitmodules" -delete;\
 	else\
-	  echo -e "$(_error_)\n [ERROR] You are trying to delete your own project GIT database!$(_reset_)";\
+	  echo -e "$(_error_)\n [ERROR] You are trying to delete your own project GIT database!\n$(_flag_)  >>> $(remote-url)$(_reset_)";\
 	fi
 
 #H# help                : Display help
