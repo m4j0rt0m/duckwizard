@@ -239,6 +239,14 @@ clean-all: clean
 	$(MAKE) -C $(FPGA_TEST_DIR)/lattice clean
 	$(MAKE) -C $(SIMULATION_DIR) clean
 
+#H# init-repo           : Initialize repository (submodules)
+	git submodule update --init --recursive
+
+#H# rm-git-db           : Remove GIT databases (.git and .gitmodules)
+rm-git-db: init-repo
+	find . -name ".git"
+	find . -name ".gitmodules"
+
 #H# help                : Display help
 help: Makefile
 	@echo -e "\nHelp!...(8)\n"
