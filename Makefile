@@ -18,12 +18,22 @@ SIMULATION_DIR          = $(TOP_DIR)/simulation
 FPGA_TEST_DIR           = $(TOP_DIR)/fpga
 SCRIPTS_DIR             = $(TOP_DIR)/scripts
 
+### external library source directory ###
+EXT_LIB_SOURCE_DIR     ?=
+ifneq ($(EXT_LIB_SOURCE_DIR),)
+EXT_LIB_RTL_DIRS        = $(wildcard $(shell find $(abspath $(EXT_LIB_SOURCE_DIR)) -type d -iname rtl ! -path "*fpga*" ! -path "*simulation*"))
+EXT_LIB_INCLUDE_DIRS    = $(wildcard $(shell find $(abspath $(EXT_LIB_SOURCE_DIR)) -type d -iname include ! -path "*fpga*" ! -path "*simulation*"))
+EXT_LIB_PACKAGE_DIRS    = $(wildcard $(shell find $(abspath $(EXT_LIB_SOURCE_DIR)) -type d -iname package ! -path "*fpga*" ! -path "*simulation*"))
+EXT_LIB_MEM_DIRS        = $(wildcard $(shell find $(abspath $(EXT_LIB_SOURCE_DIR)) -type d -iname mem ! -path "*fpga*" ! -path "*simulation*"))
+EXT_LIB_RTL_PATHS       = $(EXT_LIB_RTL_DIRS) $(EXT_LIB_INCLUDE_DIRS) $(EXT_LIB_PACKAGE_DIRS) $(EXT_LIB_MEM_DIRS)
+endif
+
 ### sources directories ###
-RTL_DIRS                = $(wildcard $(shell find $(SOURCE_DIR) -type d \( -iname rtl \)))
-INCLUDE_DIRS            = $(wildcard $(shell find $(SOURCE_DIR) -type d \( -iname include \)))
-PACKAGE_DIRS            = $(wildcard $(shell find $(SOURCE_DIR) -type d \( -iname package \)))
-MEM_DIRS                = $(wildcard $(shell find $(SOURCE_DIR) -type d \( -iname mem \)))
-RTL_PATHS               = $(RTL_DIRS) $(INCLUDE_DIRS) $(PACKAGE_DIRS) $(MEM_DIRS)
+RTL_DIRS                = $(EXT_LIB_RTL_DIRS) $(wildcard $(shell find $(SOURCE_DIR) -type d -iname rtl ! -path "*fpga*" ! -path "*simulation*"))
+INCLUDE_DIRS            = $(EXT_LIB_INCLUDE_DIRS) $(wildcard $(shell find $(SOURCE_DIR) -type d -iname include ! -path "*fpga*" ! -path "*simulation*"))
+PACKAGE_DIRS            = $(EXT_LIB_PACKAGE_DIRS) $(wildcard $(shell find $(SOURCE_DIR) -type d -iname package ! -path "*fpga*" ! -path "*simulation*"))
+MEM_DIRS                = $(EXT_LIB_MEM_DIRS) $(wildcard $(shell find $(SOURCE_DIR) -type d -iname mem ! -path "*fpga*" ! -path "*simulation*"))
+RTL_PATHS               = $(EXT_LIB_RTL_PATHS) $(RTL_DIRS) $(INCLUDE_DIRS) $(PACKAGE_DIRS) $(MEM_DIRS)
 
 ### sources wildcards ###
 VERILOG_SRC             = $(wildcard $(shell find $(RTL_DIRS) -type f \( -iname \*.v -o -iname \*.sv -o -iname \*.vhdl \)))
@@ -37,13 +47,13 @@ include $(SCRIPTS_DIR)/misc.mk
 include $(SCRIPTS_DIR)/funct.mk
 
 ### include flags ###
-INCLUDES_FLAGS        = $(addprefix -I, $(INCLUDE_DIRS))
+INCLUDES_FLAGS          = $(addprefix -I, $(INCLUDE_DIRS))
 
 ### linter flags ###
-LINT                  = verilator
-LINT_SV_FLAGS         = +1800-2017ext+sv -sv
-LINT_W_FLAGS          = -Wall -Wno-IMPORTSTAR -Wno-fatal
-LINT_FLAGS            = --lint-only $(LINT_SV_FLAGS) $(LINT_W_FLAGS) --quiet-exit --error-limit 200 $(PACKAGE_SRC) $(INCLUDES_FLAGS)
+LINT                    = verilator
+LINT_SV_FLAGS           = +1800-2017ext+sv -sv
+LINT_W_FLAGS            = -Wall -Wno-IMPORTSTAR -Wno-fatal
+LINT_FLAGS              = --lint-only $(LINT_SV_FLAGS) $(LINT_W_FLAGS) --quiet-exit --error-limit 200 $(PACKAGE_SRC) $(INCLUDES_FLAGS)
 
 #H# all                 : Run linter, FPGA synthesis and simulation
 all: veritedium lint rtl-synth rtl-sim fpga-test
