@@ -85,3 +85,9 @@ print-rtl-srcs:
 del-bak:
 	find ./* -name "*~" -delete
 	find ./* -name "*.bak" -delete
+
+#H# rm-git-db           : Remove git databases
+rm-git-db:
+	git submodule update --init --recursive
+	find . -name ".git"
+	find . -name ".gitmodules"
