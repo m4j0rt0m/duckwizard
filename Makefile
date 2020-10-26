@@ -240,6 +240,7 @@ clean-all: clean
 	$(MAKE) -C $(SIMULATION_DIR) clean
 
 #H# init-repo           : Initialize repository (submodules)
+init-repo:
 	git submodule update --init --recursive
 
 #H# rm-git-db           : Remove GIT databases (.git and .gitmodules)
