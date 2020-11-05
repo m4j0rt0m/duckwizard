@@ -40,6 +40,19 @@ LATTICE_TARGET         ?= $(shell $(PARSE_CONFIG) fpga_lattice_target)
 LATTICE_DEVICE         ?= $(shell $(PARSE_CONFIG) fpga_lattice_device)
 LATTICE_PACKAGE        ?= $(shell $(PARSE_CONFIG) fpga_lattice_package)
 LATTICE_CLOCK_MHZ      ?= $(shell $(PARSE_CONFIG) fpga_lattice_clk_mhz)
+# - fpga-rtl-sim
+FPGA_SIM_ALTERA        ?= $(shell $(PARSE_CONFIG) fpga_sim_altera)
+FPGA_SIM_LATTICE       ?= $(shell $(PARSE_CONFIG) fpga_sim_lattice)
+# - fpga-rtl-sim-altera
+SIM_ALTERA_MODULES     ?= $(shell $(PARSE_CONFIG) sim_modules_altera)
+SIM_ALTERA_TOOL        ?= $(shell $(PARSE_CONFIG) sim_tool_altera)
+SIM_ALTERA_CREATE_VCD  ?= $(shell $(PARSE_CONFIG) sim_create_vcd_altera)
+SIM_ALTERA_OPEN_WAVE   ?= $(shell $(PARSE_CONFIG) sim_open_wave_altera)
+# - fpga-rtl-sim-altera
+SIM_LATTICE_MODULES    ?= $(shell $(PARSE_CONFIG) sim_modules_lattice)
+SIM_LATTICE_TOOL       ?= $(shell $(PARSE_CONFIG) sim_tool_lattice)
+SIM_LATTICE_CREATE_VCD ?= $(shell $(PARSE_CONFIG) sim_create_vcd_lattice)
+SIM_LATTICE_OPEN_WAVE  ?= $(shell $(PARSE_CONFIG) sim_open_wave_lattice)
 
 ### export variables ###
 export CONFIG_FILE
