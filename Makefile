@@ -295,12 +295,12 @@ init-repo:
 rm-git-db: init-repo
 	$(eval remote-url=$(shell git config --get remote.origin.url))
 	@if [[ "$(remote-url)" == "$(REMOTE-URL-SSH)" ]] || [[ "$(remote-url)" == "$(REMOTE-URL-HTTPS)" ]] ; then\
-		find ./* -name ".git" -delete;\
-		find ./* -name ".gitmodules" -delete;\
-		rm -rf .git .gitmodules;\
+		find ./* -name ".git";\
+		find ./* -name ".gitmodules";\
 	else\
 	  echo -e "$(_error_)\n [ERROR] You are trying to delete your own project GIT database!\n$(_flag_)  >>> $(remote-url)$(_reset_)";\
 	fi
+#		rm -rf .git .gitmodules;\
 
 #H# help                : Display help
 help: Makefile
