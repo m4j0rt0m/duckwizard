@@ -175,6 +175,52 @@ fpga-test:
 		fi;\
 	fi
 
+#H# fpga-rtl-sim        : Run FPGA Test RTL simulation
+fpga-rtl-sim:
+	@echo -e "$(_info_)\n[INFO] RTL Simulation\n$(_reset_)";\
+	if [[ "$(FPGA_SIM_ALTERA)" != "yes" ]] && [[ "$(FPGA_SIM_LATTICE)" != "yes" ]]; then\
+		echo -e "$(_error_)[ERROR] No defined FPGA rtl simulation! Define it in the \"project.config\" file.$(_reset_)";\
+	else\
+		if [[ "$(FPGA_SIM_ALTERA)" == "yes" ]]; then\
+			if [[ "$(SIM_ALTERA_MODULES)" == "" ]]; then\
+				echo -e "$(_error_)[ERROR] No defined simulation top module!$(_reset_)";\
+			elif [[ "$(SIM_ALTERA_TOOL)" == "" ]]; then\
+				echo -e "$(_error_)[ERROR] No defined simulation tool for Altera FPGA test! Define it in the \"project.config\" file.$(_reset_)";\
+			else\
+				$(MAKE) -C $(FPGA_TEST_DIR)/altera fpga-rtl-sim\
+					SIM_MODULES="$(SIM_ALTERA_MODULES)"\
+					SIM_TOOL="$(SIM_ALTERA_TOOL)"\
+					SIM_CREATE_VCD=$(SIM_ALTERA_CREATE_VCD)\
+					SIM_OPEN_WAVE=$(SIM_ALTERA_OPEN_WAVE)\
+					EXT_VERILOG_SRC="$(VERILOG_SRC)"\
+					EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
+					EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
+					EXT_MEM_SRC="$(MEM_SRC)"\
+					EXT_INCLUDE_DIRS="$(INCLUDE_DIRS)"\
+					EXT_RTL_PATHS="$(RTL_PATHS)";\
+			fi;\
+		fi;\
+		if [[ "$(FPGA_SIM_LATTICE)" == "yes" ]]; then\
+			if [[ "$(SIM_LATTICE_MODULES)" == "" ]]; then\
+				echo -e "$(_error_)[ERROR] No defined simulation top module!$(_reset_)";\
+			elif [[ "$(SIM_LATTICE_TOOL)" == "" ]]; then\
+				echo -e "$(_error_)[ERROR] No defined simulation tool for Lattice FPGA test! Define it in the \"project.config\" file.$(_reset_)";\
+			else\
+				$(MAKE) -C $(FPGA_TEST_DIR)/lattice fpga-rtl-sim\
+					SIM_MODULES="$(SIM_LATTICE_MODULES)"\
+					SIM_TOOL="$(SIM_LATTICE_TOOL)"\
+					SIM_CREATE_VCD=$(SIM_LATTICE_CREATE_VCD)\
+					SIM_OPEN_WAVE=$(SIM_LATTICE_OPEN_WAVE)\
+					EXT_VERILOG_SRC="$(VERILOG_SRC)"\
+					EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
+					EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
+					EXT_MEM_SRC="$(MEM_SRC)"\
+					EXT_INCLUDE_DIRS="$(INCLUDE_DIRS)"\
+					EXT_RTL_PATHS="$(RTL_PATHS)";\
+			fi;\
+		fi;\
+	fi
+
 #H# fpga-flash          : Flash FPGA bitstream
 fpga-flash:
 	@if [[ "$(FPGA_SYNTH_ALTERA)" != "yes" ]] && [[ "$(FPGA_SYNTH_LATTICE)" != "yes" ]]; then\
