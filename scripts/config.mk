@@ -7,6 +7,7 @@ PROJECT                ?= $(shell $(PARSE_CONFIG) project)
 TOP_MODULE             ?= $(shell $(PARSE_CONFIG) rtl_top)
 # - rtl-synthesis
 RTL_SYN_TOOLS          ?= $(shell $(PARSE_CONFIG) rtl_synth_tools)
+RTL_SYN_USES_CLK       ?= $(shell $(PARSE_CONFIG) rtl_synth_uses_clk)
 RTL_SYN_CLK_SRC        ?= $(shell $(PARSE_CONFIG) rtl_synth_clk_src)
 # - rtl-synthesis-quartus
 RTL_SYN_Q_TARGET       ?= $(shell $(PARSE_CONFIG) rtl_synth_quartus_target)
@@ -25,6 +26,7 @@ SIM_OPEN_WAVE          ?= $(shell $(PARSE_CONFIG) sim_open_wave)
 FPGA_TOP_MODULE        ?= $(shell $(PARSE_CONFIG) fpga_top)
 FPGA_VIRTUAL_PINS      ?= $(shell $(PARSE_CONFIG) fpga_virtual_pins)
 FPGA_BOARD_TEST        ?= $(shell $(PARSE_CONFIG) fpga_board_test)
+FPGA_USES_CLOCK        ?= $(shell $(PARSE_CONFIG) fpga_uses_clk)
 FPGA_CLOCK_SRC         ?= $(shell $(PARSE_CONFIG) fpga_clk_src)
 FPGA_SYNTH_ALTERA      ?= $(shell $(PARSE_CONFIG) fpga_synth_altera)
 FPGA_SYNTH_LATTICE     ?= $(shell $(PARSE_CONFIG) fpga_synth_lattice)
@@ -57,6 +59,7 @@ SIM_LATTICE_OPEN_WAVE  ?= $(shell $(PARSE_CONFIG) sim_open_wave_lattice)
 ### export variables ###
 export CONFIG_FILE
 export PROJECT
+export RTL_SYN_USES_CLK
 export RTL_SYN_CLK_SRC
 export RTL_SYN_Q_TARGET
 export RTL_SYN_Q_DEVICE
@@ -67,6 +70,7 @@ export RTL_SYN_Y_CLK_MHZ
 export FPGA_TOP_MODULE
 export FPGA_VIRTUAL_PINS
 export FPGA_BOARD_TEST
+export FPGA_USES_CLOCK
 export FPGA_CLOCK_SRC
 export ALTERA_TARGET
 export ALTERA_DEVICE
