@@ -1,5 +1,4 @@
 ###################################################################
-# Project:                                                        #
 # Description:      RTL Development Main Makefile                 #
 #                                                                 #
 # Template written by Abraham J. Ruiz R.                          #
@@ -49,7 +48,7 @@ include $(SCRIPTS_DIR)/misc.mk
 include $(SCRIPTS_DIR)/funct.mk
 
 ### include flags ###
-INCLUDES_FLAGS          = $(addprefix -I, $(INCLUDE_DIRS))
+INCLUDES_FLAGS          = $(addprefix -I, $(RTL_PATHS))
 
 ### linter flags ###
 LINT                    = verilator
@@ -62,7 +61,12 @@ all: veritedium lint rtl-synth rtl-sim fpga-test
 
 #H# veritedium          : Run veritedium AUTO features
 veritedium:
-	$(foreach SRC,$(VERILOG_SRC),$(call veritedium-command,$(SRC)))
+	@echo "Running Veritedium Autocomplete..."
+	@$(foreach SRC,$(VERILOG_SRC),$(call veritedium-command,$(SRC)))
+	@echo "Deleting unnecessary backup files (*~ or *.bak)..."
+	find ./* -name "*~" -delete
+	find ./* -name "*.bak" -delete
+	@echo "Finished!"
 
 #H# lint                : Run the verilator linter for the RTL code
 lint: print-rtl-srcs
@@ -73,7 +77,7 @@ lint: print-rtl-srcs
 		for tmodule in $(TOP_MODULE);\
 		do\
 			echo -e "$(_flag_)\n [+] Top Module : [ $${tmodule} ]\n$(_reset_)";\
-			$(LINT) $(LINT_FLAGS) $(VERILOG_SRC) --top-module $${tmodule};\
+			$(LINT) $(LINT_FLAGS) $${tmodule}.v --top-module $${tmodule};\
 		done;\
 	fi
 
@@ -134,7 +138,6 @@ rtl-sim:
 						EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
 						EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
 						EXT_MEM_SRC="$(MEM_SRC)"\
-						EXT_INCLUDE_DIRS="$(INCLUDE_DIRS)"\
 						EXT_RTL_PATHS="$(RTL_PATHS)";\
 				done;\
 			fi;\
@@ -157,7 +160,6 @@ fpga-test:
 			  EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
 			  EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
 			  EXT_MEM_SRC="$(MEM_SRC)"\
-			  EXT_INCLUDE_DIRS="$(INCLUDE_DIRS)"\
 			  EXT_RTL_PATHS="$(RTL_PATHS)";\
 		fi;\
 		if [[ "$(FPGA_SYNTH_LATTICE)" == "yes" ]]; then\
@@ -170,7 +172,6 @@ fpga-test:
 			  EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
 			  EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
 			  EXT_MEM_SRC="$(MEM_SRC)"\
-			  EXT_INCLUDE_DIRS="$(INCLUDE_DIRS)"\
 			  EXT_RTL_PATHS="$(RTL_PATHS)";\
 		fi;\
 	fi
@@ -196,7 +197,6 @@ fpga-rtl-sim:
 					EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
 					EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
 					EXT_MEM_SRC="$(MEM_SRC)"\
-					EXT_INCLUDE_DIRS="$(INCLUDE_DIRS)"\
 					EXT_RTL_PATHS="$(RTL_PATHS)";\
 			fi;\
 		fi;\
@@ -215,7 +215,6 @@ fpga-rtl-sim:
 					EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
 					EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
 					EXT_MEM_SRC="$(MEM_SRC)"\
-					EXT_INCLUDE_DIRS="$(INCLUDE_DIRS)"\
 					EXT_RTL_PATHS="$(RTL_PATHS)";\
 			fi;\
 		fi;\
@@ -232,7 +231,6 @@ fpga-flash:
 				EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
 				EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
 				EXT_MEM_SRC="$(MEM_SRC)"\
-				EXT_INCLUDE_DIRS="$(INCLUDE_DIRS)"\
 				EXT_RTL_PATHS="$(RTL_PATHS)";\
 		fi;\
 		if [[ "$(FPGA_SYNTH_LATTICE)" == "yes" ]]; then\
@@ -241,7 +239,6 @@ fpga-flash:
 				EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
 				EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
 				EXT_MEM_SRC="$(MEM_SRC)"\
-				EXT_INCLUDE_DIRS="$(INCLUDE_DIRS)"\
 				EXT_RTL_PATHS="$(RTL_PATHS)";\
 		fi;\
 	fi
@@ -259,7 +256,6 @@ lint-fpga-test:
 			  EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
 			  EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
 			  EXT_MEM_SRC="$(MEM_SRC)"\
-			  EXT_INCLUDE_DIRS="$(INCLUDE_DIRS)"\
 			  EXT_RTL_PATHS="$(RTL_PATHS)";\
 		fi;\
 		if [[ "$(FPGA_SYNTH_LATTICE)" == "yes" ]]; then\
@@ -270,7 +266,6 @@ lint-fpga-test:
 			  EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
 			  EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
 			  EXT_MEM_SRC="$(MEM_SRC)"\
-			  EXT_INCLUDE_DIRS="$(INCLUDE_DIRS)"\
 			  EXT_RTL_PATHS="$(RTL_PATHS)";\
 		fi;\
 	fi
