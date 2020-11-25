@@ -1,6 +1,6 @@
 ### function define: veritedium AUTO directive ###
 define veritedium-command
-emacs --batch $(1) -f verilog-auto -f save-buffer;
+emacs --batch $(1) -f verilog-auto -f save-buffer >/dev/null 2>&1;
 endef
 
 ### function define: print sources ###
