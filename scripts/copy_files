@@ -1,0 +1,10 @@
+#!/bin/bash
+
+filename_list=$1
+destination_dir=$2
+
+while read filename; do
+  echo "copy ${filename} to ${destination_dir}/${filename}"
+done < $filename_list
+
+
