@@ -35,6 +35,7 @@ INCLUDE_DIRS            = $(EXT_LIB_INCLUDE_DIRS) $(wildcard $(shell find $(SOUR
 PACKAGE_DIRS            = $(EXT_LIB_PACKAGE_DIRS) $(wildcard $(shell find $(SOURCE_DIR) -type d -iname package ! -path "*fpga*" ! -path "*simulation*"))
 MEM_DIRS                = $(EXT_LIB_MEM_DIRS) $(wildcard $(shell find $(SOURCE_DIR) -type d -iname mem ! -path "*fpga*" ! -path "*simulation*"))
 RTL_PATHS               = $(EXT_LIB_RTL_PATHS) $(RTL_DIRS) $(INCLUDE_DIRS) $(PACKAGE_DIRS) $(MEM_DIRS)
+TOP_MODULE_FILE         = $(shell basename $(shell grep -i -w -r "module $(TOP_MODULE)" $(RTL_PATHS) | cut -d ":" -f 1))
 
 ### sources wildcards ###
 VERILOG_SRC             = $(wildcard $(shell find $(RTL_DIRS) -type f \( -iname \*.v -o -iname \*.sv -o -iname \*.vhdl \)))
@@ -51,13 +52,40 @@ include $(SCRIPTS_DIR)/funct.mk
 INCLUDES_FLAGS          = $(addprefix -I, $(RTL_PATHS))
 
 ### linter flags ###
-LINT                    = verilator
-LINT_SV_FLAGS           = +1800-2017ext+sv -sv
-LINT_W_FLAGS            = -Wall -Wno-IMPORTSTAR -Wno-fatal
-LINT_FLAGS              = --lint-only $(LINT_SV_FLAGS) $(LINT_W_FLAGS) --quiet-exit --error-limit 200 $(PACKAGE_SRC) $(INCLUDES_FLAGS)
+VERILATOR_LINT          = verilator
+VERILATOR_LINT_SV_FLAGS = +1800-2017ext+sv -sv
+VERILATOR_LINT_W_FLAGS  = -Wall -Wno-IMPORTSTAR -Wno-fatal
+VERILATOR_CONFIG_FILE   = $(SCRIPT_DIR)/config.vlt
+ifeq ("$(wildcard $(VERILATOR_CONFIG_FILE))","")
+VERILATOR_CONFIG_FILE   =
+endif
+SPYGLASS_LINT           = $(SCRIPTS_DIR)/spyglass_lint
+SPYGLASS_WAIVER_FILE    = $(SCRIPTS_DIR)/spyglass_waiver.awl
+ifeq ("$(wildcard $(SPYGLASS_WAIVER_FILE))","")
+SPYGLASS_WAIVER_OPTION  =
+else
+SPYGLASS_WAIVER_OPTION  = --waiver $(subst $(TOP_DIR)/,,$(SPYGLASS_WAIVER_FILE))
+endif
+ifeq ("$(RTL_LINTER_ENV_SOURCE)","")
+LINTER_ENV_OPTION       =
+else
+LINTER_ENV_OPTION       = --env-src $(RTL_LINTER_ENV_SOURCE)
+endif
+ifeq ($(RTL_LINTER_REMOTE),yes)
+LINTER_REMOTE_OPTION    = --remote $(RTL_LINTER_REMOTE_IP) --use-env
+else
+LINTER_REMOTE_OPTION    =
+endif
+ifeq ($(RTL_LINTER),spyglass)
+LINT                    = $(SPYGLASS_LINT)
+LINT_FLAGS              = --top $(TOP_MODULE) --files $(subst $(TOP_DIR)/,,$(VERILOG_SRC)) --includes $(subst $(TOP_DIR)/,,$(RTL_PATHS)) --sv --license $(RTL_LINTER_LICENSE) $(LINTER_REMOTE_OPTION) $(LINTER_ENV_OPTION) $(SPYGLASS_WAIVER_OPTION) --move --debug
+else
+LINT                    = $(VERILATOR_LINT)
+LINT_FLAGS              = --lint-only $(VERILATOR_LINT_SV_FLAGS) $(VERILATOR_LINT_W_FLAGS) --quiet-exit --error-limit 200 $(VERILATOR_CONFIG_FILE) $(PACKAGE_SRC) $(INCLUDES_FLAGS) $(TOP_MODULE_FILE)
+endif
 
 #H# all                 : Run linter, FPGA synthesis and simulation
-all: veritedium lint rtl-synth rtl-sim fpga-test
+all: lint rtl-synth rtl-sim fpga-test
 
 #H# veritedium          : Run veritedium AUTO features
 veritedium:
@@ -68,18 +96,23 @@ veritedium:
 	find ./* -name "*.bak" -delete
 	@echo -e "$(_flag_)Finished!$(_reset_)"
 
-#H# lint                : Run the verilator linter for the RTL code
-lint: veritedium print-rtl-srcs
+#H# lint                : Run the RTL code linter
+lint: print-rtl-srcs
 	@if [[ "$(TOP_MODULE)" == "" ]]; then\
 		echo -e "$(_error_)[ERROR] No defined top module!$(_reset_)";\
 	else\
 		echo -e "$(_info_)\n[INFO] Linting using $(LINT) tool$(_reset_)";\
 		for tmodule in $(TOP_MODULE);\
 		do\
-			echo -e "$(_flag_)\n [+] Top Module : [ $${tmodule} ]\n$(_reset_)";\
-			$(LINT) $(LINT_FLAGS) $${tmodule}.v --top-module $${tmodule};\
+			$(MAKE) lint-module TOP_MODULE=$${tmodule};\
 		done;\
 	fi
+
+lint-module:
+	@echo -e "$(_flag_)\n [+] Top Module : [ $(TOP_MODULE) ]\n$(_reset_)";\
+	echo "$(RTL_LINTER)";\
+	echo -e "$(_flag_) cmd: $(LINT) $(LINT_FLAGS)\n$(_reset_)";\
+	$(LINT) $(LINT_FLAGS);\
 
 #H# rtl-synth           : Run RTL synthesis
 rtl-synth:
@@ -104,11 +137,11 @@ rtl-synth:
 					echo -e "$(_flag_)\n [*] Synthesis Top Module : $${tmodule}\n$(_reset_)";\
 					$(MAKE) -C $(SYNTHESIS_DIR)/$${stool} rtl-synth\
 						TOP_MODULE=$${tmodule}\
-					  VERILOG_SRC="$(VERILOG_SRC)"\
-					  VERILOG_HEADERS="$(VERILOG_HEADERS)"\
-					  PACKAGE_SRC="$(PACKAGE_SRC)"\
-					  MEM_SRC="$(MEM_SRC)"\
-					  RTL_PATHS="$(RTL_PATHS)";\
+						VERILOG_SRC="$(VERILOG_SRC)"\
+						VERILOG_HEADERS="$(VERILOG_HEADERS)"\
+						PACKAGE_SRC="$(PACKAGE_SRC)"\
+						MEM_SRC="$(MEM_SRC)"\
+						RTL_PATHS="$(RTL_PATHS)";\
 			  done;\
 		  fi;\
 		done;\

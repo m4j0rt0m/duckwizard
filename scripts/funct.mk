@@ -18,7 +18,7 @@ define print-srcs-command
 		echo "  |-> $${vheader}";\
 	done
 	@echo " [+] Packages Source Files: $(words $(PACKAGE_SRC))";\
-	for psrc in $(PACKAGES_SRC);\
+	for psrc in $(PACKAGE_SRC);\
 	do\
 		echo "  |-> $${psrc}";\
 	done
