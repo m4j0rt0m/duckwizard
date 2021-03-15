@@ -1,4 +1,0 @@
-[submodule "fpga"]
-	path = fpga
-	url = git@github.com:m4j0rt0m/rtl-develop-template-fpga-test.git
-	branch = master
