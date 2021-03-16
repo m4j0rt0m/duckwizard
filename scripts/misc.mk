@@ -19,7 +19,7 @@ export _error_
 export _segment_
 
 ### environment directory ###
-RTL_ENV_FEATURE_GIT:=$(subst .git,$(if $(RTL_ENV_SUBFEATURE),-$(RTL_ENV_FEATURE)-$(RTL_ENV_SUBFEATURE),-$(RTL_ENV_FEATURE)),$(REMOTE-URL-HTTPS))
+RTL_ENV_FEATURE_GIT:=$(subst .git,$(if $(RTL_ENV_SUBFEATURE),-$(RTL_ENV_FEATURE)-$(RTL_ENV_SUBFEATURE).git,-$(RTL_ENV_FEATURE).git),$(REMOTE-URL-HTTPS))
 RTL_ENV_FEATURE_DIR:=$(if $(RTL_ENV_SUBFEATURE),$(RTL_ENV_FEATURE)/$(RTL_ENV_SUBFEATURE),$(RTL_ENV_FEATURE))
 
 #H# print-config        : Display project configuration
