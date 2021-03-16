@@ -291,11 +291,38 @@ clean: del-bak
 
 #H# clean-all           : Clean all the build directories
 clean-all: clean
-	$(MAKE) -C $(SYNTHESIS_DIR)/quartus clean
-	$(MAKE) -C $(SYNTHESIS_DIR)/yosys clean
-	$(MAKE) -C $(FPGA_TEST_DIR)/altera clean
-	$(MAKE) -C $(FPGA_TEST_DIR)/lattice clean
-	$(MAKE) -C $(SIMULATION_DIR) clean
+	@if [ -d $(SIMULATION_DIR) ]; then $(MAKE) -C $(SIMULATION_DIR) clean; fi
+	@syn_tool_list=($(SUPPORTED_SYNTHESIS));\
+	for sidx in `seq 0 $$(($${#syn_tool_list[@]}-1))`;\
+	do\
+		stool=$${syn_tool_list[$$sidx]};\
+		if [ -d $(SYNTHESIS_DIR)/$${stool} ]; then $(MAKE) -C $(SYNTHESIS_DIR)/$${stool} clean; fi;\
+	done
+	@fpga_test_list=($(SUPPORTED_FPGA_TEST));\
+	for fidx in `seq 0 $$(($${#fpga_test_list[@]}-1))`;\
+	do\
+		ftest=$${fpga_test_list[$$fidx]};\
+		if [ -d $(FPGA_TEST_DIR)/$${ftest} ]; then $(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} clean; fi;\
+		if [ -d $(FPGA_TEST_DIR)/$${ftest}/simulation ]; then $(MAKE) -C $(FPGA_TEST_DIR)/$${ftest}/simulation clean; fi;\
+	done
+
+#H# env-dirs            : Create features environment directories (synthesis, fpga-test, simulation, etc.)
+env-dirs:
+	@if [[ "$(RTL_SYN_TOOLS)" != "" ]]; then\
+		for stool in $(RTL_SYN_TOOLS);\
+		do\
+			$(MAKE) check-dir-env RTL_ENV_FEATURE=synthesis RTL_ENV_SUBFEATURE=$${stool};\
+		done;\
+	fi
+	@if [[ "$(SIM_TOOL)" != "" ]]; then\
+		$(MAKE) check-dir-env RTL_ENV_FEATURE=simulation;\
+	fi
+	@if [[ "$(FPGA_TEST)" != "" ]]; then\
+		for ftest in $(FPGA_TEST);\
+		do\
+			$(MAKE) check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
+		done;\
+	fi
 
 #H# init-repo           : Initialize repository (submodules)
 init-repo:
