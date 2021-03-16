@@ -340,9 +340,9 @@ rm-git-db: init-repo
 #		rm -rf .git .gitmodules;\
 
 #H# help                : Display help
-help: Makefile
+help: Makefile scripts/misc.mk
 	@echo -e "\nHelp!...(8)\n"
-	@sed -n 's/^#H#//p' $<
+	@sed -n 's/^#H#//p' $^
 	@echo ""
 
 #H# help-all            : Display complete rules help
