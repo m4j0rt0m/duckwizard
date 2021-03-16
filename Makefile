@@ -241,52 +241,48 @@ fpga-rtl-sim:
 
 #H# fpga-flash          : Flash FPGA bitstream
 fpga-flash:
-	@if [[ "$(FPGA_SYNTH_ALTERA)" != "yes" ]] && [[ "$(FPGA_SYNTH_LATTICE)" != "yes" ]]; then\
+	@if [[ "$(FPGA_TEST)" == "" ]]; then\
 		echo -e "$(_error_)\n[ERROR] No defined FPGA test! Define it in the \"project.config\" file.$(_reset_)";\
 	else\
-		if [[ "$(FPGA_SYNTH_ALTERA)" == "yes" ]]; then\
-			$(MAKE) -C $(FPGA_TEST_DIR)/altera altera-flash-fpga\
-				EXT_VERILOG_SRC="$(VERILOG_SRC)"\
-				EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
-				EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
-				EXT_MEM_SRC="$(MEM_SRC)"\
-				EXT_RTL_PATHS="$(RTL_PATHS)";\
-		fi;\
-		if [[ "$(FPGA_SYNTH_LATTICE)" == "yes" ]]; then\
-			$(MAKE) -C $(FPGA_TEST_DIR)/lattice lattice-flash-fpga\
-				EXT_VERILOG_SRC="$(VERILOG_SRC)"\
-				EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
-				EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
-				EXT_MEM_SRC="$(MEM_SRC)"\
-				EXT_RTL_PATHS="$(RTL_PATHS)";\
-		fi;\
+		ftest_list=($(FPGA_TEST));\
+		for fidx in `seq 0 $$(($${#ftest_list[@]}-1))`;\
+		do\
+			ftest=$${ftest_list[$$fidx]};\
+			$(MAKE) check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
+			fpga_target=$${ftest^^}_TARGET;\
+			fpga_device=$${ftest^^}_DEVICE;\
+			echo -e "$(_flag_)\n [*] Running flash FPGA job - $${ftest^}";\
+			echo -e "  |-> Target     : $${!fpga_target}";\
+			echo -e "  |-> Device     : $${!fpga_device}";\
+			echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
+			$(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} $${ftest}-flash-fpga\
+			  EXT_VERILOG_SRC="$(VERILOG_SRC)"\
+			  EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
+			  EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
+			  EXT_MEM_SRC="$(MEM_SRC)"\
+			  EXT_RTL_PATHS="$(RTL_PATHS)";\
+		done;\
 	fi
 
 #H# lint-fpga           : Run the verilator linter for the RTL code used in the FPGA test
 lint-fpga-test:
-	@if [[ "$(FPGA_SYNTH_ALTERA)" != "yes" ]] && [[ "$(FPGA_SYNTH_LATTICE)" != "yes" ]]; then\
+	@if [[ "$(FPGA_TEST)" == "" ]]; then\
 		echo -e "$(_error_)[ERROR] No defined FPGA test! Define it in the \"project.config\" file.$(_reset_)";\
 	else\
-		if [[ "$(FPGA_SYNTH_ALTERA)" == "yes" ]]; then\
-			echo -e "$(_flag_)\n [*] Running linter for Altera FPGA test";\
+		ftest_list=($(FPGA_TEST));\
+		for fidx in `seq 0 $$(($${#ftest_list[@]}-1))`;\
+		do\
+			ftest=$${ftest_list[$$fidx]};\
+			$(MAKE) check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
+			echo -e "$(_flag_)\n [*] Running linter for $${ftest^} FPGA test";\
 			echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
-			$(MAKE) -C $(FPGA_TEST_DIR)/altera lint\
+			$(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} lint\
 			  EXT_VERILOG_SRC="$(VERILOG_SRC)"\
 			  EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
 			  EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
 			  EXT_MEM_SRC="$(MEM_SRC)"\
 			  EXT_RTL_PATHS="$(RTL_PATHS)";\
-		fi;\
-		if [[ "$(FPGA_SYNTH_LATTICE)" == "yes" ]]; then\
-			echo -e "$(_flag_)\n [*] Running linter for Lattice FPGA test";\
-			echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
-			$(MAKE) -C $(FPGA_TEST_DIR)/lattice lint\
-			  EXT_VERILOG_SRC="$(VERILOG_SRC)"\
-			  EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
-			  EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
-			  EXT_MEM_SRC="$(MEM_SRC)"\
-			  EXT_RTL_PATHS="$(RTL_PATHS)";\
-		fi;\
+		done;\
 	fi
 
 #H# clean               : Clean the build directory
