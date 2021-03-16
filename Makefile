@@ -209,46 +209,34 @@ fpga-test:
 
 #H# fpga-rtl-sim        : Run FPGA Test RTL simulation
 fpga-rtl-sim:
-	@echo -e "$(_info_)\n[INFO] RTL Simulation\n$(_reset_)";\
-	if [[ "$(FPGA_SIM_ALTERA)" != "yes" ]] && [[ "$(FPGA_SIM_LATTICE)" != "yes" ]]; then\
-		echo -e "$(_error_)[ERROR] No defined FPGA rtl simulation! Define it in the \"project.config\" file.$(_reset_)";\
+	@echo -e "$(_info_)\n[INFO] FPGA Test Simulation\n$(_reset_)";\
+	if [[ "$(FPGA_SIM_TEST)" == "" ]]; then\
+		echo -e "$(_error_)[ERROR] No defined FPGA test simulation target! Define it in the \"project.config\" file.$(_reset_)";\
+	elif [[ "$(FPGA_SIM_TOOL)" == "" ]]; then\
+		echo -e "$(_error_)[ERROR] No defined simulation tool for the FPGA test! Define it in the \"project.config\" file.$(_reset_)";\
 	else\
-		if [[ "$(FPGA_SIM_ALTERA)" == "yes" ]]; then\
-			if [[ "$(SIM_ALTERA_MODULES)" == "" ]]; then\
-				echo -e "$(_error_)[ERROR] No defined simulation top module!$(_reset_)";\
-			elif [[ "$(SIM_ALTERA_TOOL)" == "" ]]; then\
-				echo -e "$(_error_)[ERROR] No defined simulation tool for Altera FPGA test! Define it in the \"project.config\" file.$(_reset_)";\
-			else\
-				$(MAKE) -C $(FPGA_TEST_DIR)/altera fpga-rtl-sim\
-					SIM_MODULES="$(SIM_ALTERA_MODULES)"\
-					SIM_TOOL="$(SIM_ALTERA_TOOL)"\
-					SIM_CREATE_VCD=$(SIM_ALTERA_CREATE_VCD)\
-					SIM_OPEN_WAVE=$(SIM_ALTERA_OPEN_WAVE)\
+		fsim_list=($(FPGA_SIM_TEST));\
+		stool_list=($(FPGA_SIM_TOOL));\
+		for fidx in `seq 0 $$(($${#fsim_list[@]}-1))`;\
+		do\
+			fsim=$${fsim_list[$$fidx]};\
+			$(MAKE) check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${fsim};\
+			fsim_modules=FPGA_SIM_MODULES_$${fsim^^};\
+			for sidx in `seq 0 $$(($${#stool_list[@]}-1))`;\
+			do\
+				stool=$${stool_list[$$sidx]};\
+				$(MAKE) -C $(FPGA_TEST_DIR)/$${fsim} fpga-rtl-sim\
+					FPGA_SIM_MODULES="$${!fsim_modules}"\
+					SIM_TOOL="$${stool}"\
+					SIM_CREATE_VCD=$(FPGA_SIM_CREATE_VCD)\
+					SIM_OPEN_WAVE=$(FPGA_SIM_OPEN_WAVE)\
 					EXT_VERILOG_SRC="$(VERILOG_SRC)"\
 					EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
 					EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
 					EXT_MEM_SRC="$(MEM_SRC)"\
 					EXT_RTL_PATHS="$(RTL_PATHS)";\
-			fi;\
-		fi;\
-		if [[ "$(FPGA_SIM_LATTICE)" == "yes" ]]; then\
-			if [[ "$(SIM_LATTICE_MODULES)" == "" ]]; then\
-				echo -e "$(_error_)[ERROR] No defined simulation top module!$(_reset_)";\
-			elif [[ "$(SIM_LATTICE_TOOL)" == "" ]]; then\
-				echo -e "$(_error_)[ERROR] No defined simulation tool for Lattice FPGA test! Define it in the \"project.config\" file.$(_reset_)";\
-			else\
-				$(MAKE) -C $(FPGA_TEST_DIR)/lattice fpga-rtl-sim\
-					SIM_MODULES="$(SIM_LATTICE_MODULES)"\
-					SIM_TOOL="$(SIM_LATTICE_TOOL)"\
-					SIM_CREATE_VCD=$(SIM_LATTICE_CREATE_VCD)\
-					SIM_OPEN_WAVE=$(SIM_LATTICE_OPEN_WAVE)\
-					EXT_VERILOG_SRC="$(VERILOG_SRC)"\
-					EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
-					EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
-					EXT_MEM_SRC="$(MEM_SRC)"\
-					EXT_RTL_PATHS="$(RTL_PATHS)";\
-			fi;\
-		fi;\
+			done;\
+		done;\
 	fi
 
 #H# fpga-flash          : Flash FPGA bitstream
