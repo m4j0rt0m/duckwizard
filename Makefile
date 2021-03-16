@@ -184,33 +184,27 @@ rtl-sim:
 #H# fpga-test           : Run the FPGA test
 fpga-test:
 	@echo -e "$(_flag_)\n[INFO] FPGA Test$(_reset_)";\
-	if [[ "$(FPGA_SYNTH_ALTERA)" != "yes" ]] && [[ "$(FPGA_SYNTH_LATTICE)" != "yes" ]]; then\
+	if [[ "$(FPGA_TEST)" == "" ]]; then\
 		echo -e "$(_error_)[ERROR] No defined FPGA test! Define it in the \"project.config\" file.$(_reset_)";\
 	else\
-		if [[ "$(FPGA_SYNTH_ALTERA)" == "yes" ]]; then\
-			echo -e "$(_flag_)\n [*] Running compilation flow for Altera FPGA";\
-			echo "  |-> Target     : $(ALTERA_TARGET)";\
-			echo "  |-> Device     : $(ALTERA_DEVICE)";\
+		ftest_list=($(FPGA_TEST));\
+		for fidx in `seq 0 $$(($${#ftest_list[@]}-1))`;\
+		do\
+			ftest=$${ftest_list[$$fidx]};\
+			$(MAKE) check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
+			fpga_target=$${ftest^^}_TARGET;\
+			fpga_device=$${ftest^^}_DEVICE;\
+			echo -e "$(_flag_)\n [*] Running compilation flow - $${ftest^}";\
+			echo -e "  |-> Target     : $${!fpga_target}";\
+			echo -e "  |-> Device     : $${!fpga_device}";\
 			echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
-			$(MAKE) -C $(FPGA_TEST_DIR)/altera altera-project\
+			$(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} $${ftest}-project\
 			  EXT_VERILOG_SRC="$(VERILOG_SRC)"\
 			  EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
 			  EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
 			  EXT_MEM_SRC="$(MEM_SRC)"\
 			  EXT_RTL_PATHS="$(RTL_PATHS)";\
-		fi;\
-		if [[ "$(FPGA_SYNTH_LATTICE)" == "yes" ]]; then\
-			echo -e "$(_flag_)\n [*] Running compilation flow for Lattice FPGA";\
-			echo "  |-> Target     : $(LATTICE_TARGET)";\
-			echo "  |-> Device     : $(LATTICE_DEVICE)";\
-			echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
-			$(MAKE) -C $(FPGA_TEST_DIR)/lattice lattice-project\
-			  EXT_VERILOG_SRC="$(VERILOG_SRC)"\
-			  EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
-			  EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
-			  EXT_MEM_SRC="$(MEM_SRC)"\
-			  EXT_RTL_PATHS="$(RTL_PATHS)";\
-		fi;\
+		done;\
 	fi
 
 #H# fpga-rtl-sim        : Run FPGA Test RTL simulation
