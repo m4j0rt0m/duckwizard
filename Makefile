@@ -152,14 +152,19 @@ rtl-sim:
 	if [[ "$(SIM_TOOL)" == "" ]]; then\
 		echo -e "$(_error_)[ERROR] No defined RTL simulation tool! Define \"SIM_TOOL\" environment variable or define it in the \"project.config\" file.$(_reset_)";\
 	else\
-		for stool in $(SIM_TOOL);\
+		stool_list=($(SIM_TOOL));\
+		for sidx in `seq 0 $$(($${#stool_list[@]}-1))`;\
 		do\
+			stool=$${stool_list[$$sidx]};\
+			$(MAKE) check-dir-env RTL_ENV_FEATURE=simulation;\
 			if [[ "$(SIM_MODULES)" == "" ]]; then\
 				echo -e "$(_error_)[ERROR] No defined simulation top module!$(_reset_)";\
 			else\
 				echo -e "$(_info_)[INFO] Simulation with $${stool} tool\n$(_reset_)";\
-				for smodule in $(SIM_MODULES);\
+				smodule_list=($(SIM_MODULES));\
+				for sidx in `seq 0 $$(($${#smodule_list[@]}-1))`;\
 				do\
+					smodule=$${smodule_list[$$sidx]};\
 					echo -e "$(_flag_)\n [*] Simulating Top Module : $${smodule}\n$(_reset_)";\
 					$(MAKE) -C $(SIMULATION_DIR) sim\
 						SIM_TOP_MODULE=$${smodule}\
