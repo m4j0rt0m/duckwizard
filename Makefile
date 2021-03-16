@@ -120,20 +120,19 @@ rtl-synth:
 	if [[ "$(RTL_SYN_TOOLS)" == "" ]]; then\
 		echo -e "$(_error_)[ERROR] No defined RTL synthesis tool! Define \"RTL_SYN_TOOLS\" environment variable or define it in the \"project.config\" file."$(_reset_);\
 	else\
-		echo -e "$(_segment_)\n [+] RTL Synthesis Tools:";\
-		for stool in $(RTL_SYN_TOOLS);\
+		stool_list=($(RTL_SYN_TOOLS));\
+		for sidx in `seq 0 $$(($${#stool_list[@]}-1))`;\
 		do\
-			echo "  |-> $${stool}";\
-		done;\
-		echo -e "$(_reset_)";\
-		for stool in $(RTL_SYN_TOOLS);\
-		do\
+			stool=$${stool_list[$$sidx]};\
+			$(MAKE) check-dir-env RTL_ENV_FEATURE=synthesis RTL_ENV_SUBFEATURE=$${stool};\
 			if [[ "$(TOP_MODULE)" == "" ]]; then\
 				echo -e "$(_error_)[ERROR] No defined top module!$(_reset_)";\
 			else\
 				echo -e "$(_info_)\n[INFO] Running $${stool} synthesis tool$(_reset_)";\
-				for tmodule in $(TOP_MODULE);\
+				tmodule_list=($(TOP_MODULE));\
+				for tidx in `seq 0 $$(($${#tmodule_list[@]}-1))`;\
 				do\
+					tmodule=$${tmodule_list[$$tidx]};\
 					echo -e "$(_flag_)\n [*] Synthesis Top Module : $${tmodule}\n$(_reset_)";\
 					$(MAKE) -C $(SYNTHESIS_DIR)/$${stool} rtl-synth\
 						TOP_MODULE=$${tmodule}\
