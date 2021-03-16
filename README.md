@@ -1,9 +1,12 @@
 # RTL Development Template
 
-Initialize all the submodules before using it:
+Before using the template, fill the feature lists in ***project.config*** and run:
 ```
-git submodule update --init --recursive
+make env-dirs
 ```
+It will create the feature's directories depending on the filled information in ***project.config*** file.
+
+### Overview
 This is an RTL development tool that handles the processes of HDL linting, synthesis, simulation and FPGA tests automatically. It's scalable, user friendly and easy to port to your own project.
 
 ### Divide and conquer
