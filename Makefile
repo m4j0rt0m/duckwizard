@@ -1,14 +1,14 @@
-###################################################################
-# Description:      RTL Development Main Makefile                 #
-#                                                                 #
-# Template written by Abraham J. Ruiz R.                          #
-#   https://github.com/m4j0rt0m/rtl-develop-template              #
-###################################################################
+# Author:      Abraham J. Ruiz R.
+# Description: Main project Makefile for linting, synthesis, simulation ant testing features
+# Version:     1.1
+# Url:         https://github.com/m4j0rt0m/duckwizard
 
+### header flags ###
 SHELL                  := /bin/bash
-REMOTE-URL-SSH         := git@github.com:m4j0rt0m/rtl-develop-template.git
-REMOTE-URL-HTTPS       := https://github.com/m4j0rt0m/rtl-develop-template.git
+REMOTE-URL-SSH         := git@github.com:m4j0rt0m/duckwizard.git
+REMOTE-URL-HTTPS       := https://github.com/m4j0rt0m/duckwizard.git
 
+### top directory ###
 MKFILE_PATH             = $(abspath $(firstword $(MAKEFILE_LIST)))
 TOP_DIR                 = $(shell dirname $(MKFILE_PATH))
 
@@ -108,6 +108,7 @@ lint: print-rtl-srcs
 		done;\
 	fi
 
+#H# lint-module         : Run pre-specified linter for <top module>, use 'make lint' instead
 lint-module:
 	@echo -e "$(_flag_)\n [+] Top Module : [ $(TOP_MODULE) ]\n$(_reset_)";\
 	echo "$(RTL_LINTER)";\
