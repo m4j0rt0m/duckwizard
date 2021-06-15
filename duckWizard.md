@@ -1,6 +1,6 @@
-# RTL Development Template
+# duckWizard
 
-Before using the template, fill the feature lists in ***project.config*** and run:
+**duckWizard** is a modular platform for HW-RTL development, in simple words, it tries to automatize every process involved in RTL development, it has a source-files listing process which can be used for linting, synthesis, simulation and, FPGA testing. Depending on the desired features to be used in your project (simulation, synthesis, FPGA tests, etc.), some directories would be automatically created in simulation/, synthesis/ and fpga/ respectively, and the main Makefile would communicate with the Makefiles inside of these features directories. Before using the template, fill the feature lists in ***project.config*** and run:
 ```
 make env-dirs
 ```
@@ -22,7 +22,7 @@ The main Makefile is allocated in the root directory and is in charge of reading
 
 - This Makefile is scalable and more targets and processes can be added to it easily, the already written jobs can be used as a guide for it.
 - If using an external library, the path(s) can be included setting the ***EXT_LIB_SOURCE_DIR*** variable.
-- If you need help in order to know what command to run ***"make help"*** is your friend.
+- If you don't know what command to run, ***"make help"*** is your friend.
 
 ### Support
 As this is a work-in-progress project, more useful stuff will be added time to time to it, although, it can already be used for several projects:
