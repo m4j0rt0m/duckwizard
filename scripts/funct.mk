@@ -29,3 +29,21 @@ define print-srcs-command
 	done;\
 	echo -e "$(_reset_)"
 endef
+
+### function define: print filelist ###
+define print-filelist
+	@> $(1);\
+	for idir in $(INCLUDE_DIRS);\
+	do\
+		{ echo "+incdir+"; echo "$${idir}" | grep -oP "^$(2)/\K.*"; echo "/";} | tr -d "\n"  >> $(1);\
+		echo "" >> $(1);\
+	done;\
+	for psrc in $(PACKAGE_SRC);\
+	do\
+		echo "$${psrc}" | grep -oP "^$(2)/\K.*" >> $(1);\
+	done;\
+	for vsrc in $(VERILOG_SRC);\
+	do\
+		echo "$${vsrc}" | grep -oP "^$(2)/\K.*" >> $(1);\
+	done
+endef
