@@ -18,6 +18,7 @@ SYNTHESIS_DIR           = $(TOP_DIR)/synthesis
 SIMULATION_DIR          = $(TOP_DIR)/simulation
 FPGA_TEST_DIR           = $(TOP_DIR)/fpga
 SCRIPTS_DIR             = $(TOP_DIR)/scripts
+DESIGN_RTL_DIR          = $(TOP_DIR)
 FILELIST                = $(TOP_DIR)/filelist.f
 
 ### external library source directory ###

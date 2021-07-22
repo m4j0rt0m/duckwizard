@@ -35,15 +35,17 @@ define print-filelist
 	@> $(1);\
 	for idir in $(INCLUDE_DIRS);\
 	do\
-		{ echo "+incdir+"; echo "$${idir}" | grep -oP "^$(2)/\K.*"; echo "/";} | tr -d "\n"  >> $(1);\
+		{ echo '+incdir+$${DESIGN_RTL_DIR}/'; echo "$${idir}" | grep -oP "^$(2)/\K.*";} | tr -d "\n"  >> $(1);\
 		echo "" >> $(1);\
 	done;\
 	for psrc in $(PACKAGE_SRC);\
 	do\
-		echo "$${psrc}" | grep -oP "^$(2)/\K.*" >> $(1);\
+		{ echo '$${DESIGN_RTL_DIR}/'; echo "$${psrc}" | grep -oP "^$(2)/\K.*";} | tr -d "\n" >> $(1);\
+		echo "" >> $(1);\
 	done;\
 	for vsrc in $(VERILOG_SRC);\
 	do\
-		echo "$${vsrc}" | grep -oP "^$(2)/\K.*" >> $(1);\
+		{ echo '$${DESIGN_RTL_DIR}/'; echo "$${vsrc}" | grep -oP "^$(2)/\K.*";} | tr -d "\n" >> $(1);\
+		echo "" >> $(1);\
 	done
 endef
