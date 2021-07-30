@@ -1,0 +1,124 @@
+#!/bin/bash
+
+#########################################################################
+#                                                                       #
+# Script Name   : order_sv_pkg                                          #
+# Description   : SystemVerilog packages list-ordering script, prints   #
+#                 out the packages in dependency order.                 #
+# Author(s)     : Abraham J. Ruiz R. [www.github.com/m4j0rt0m]          #
+#                   abraham.j.ruiz.r@gmail.com                          #
+# Version       : v1.0 - 23/05/2021                                     #
+# Notes         : - More than one package per file unsupported.         #
+#                 - Input files should be only package files.           #
+#                 - File should have the package's name: <package>.sv   #
+# Future Work   : - Support more packages per file                      #
+#                 - Package can have a different name than the filename #
+#                                                                       #
+#########################################################################
+
+file_pkg=("$@")
+declare -a name_pkg
+declare -a deps_pkg
+declare -a idx_pkg
+declare -a size_list_pkg
+declare -a flag_set
+declare -a flag_req
+declare -a flag_dep
+
+debug="yes"
+
+### get filename ###
+function get_filename () {
+  filename=$(basename -- "$1")
+  extension="${filename##*.}"
+  filename="${filename%.*}"
+  echo $filename
+}
+
+### extract package dependencies ###
+function extract_pkg_deps () {
+  ext_deps=$(grep -x 'import .*::.*;$' $1 | awk -F\import '{ print $2 }' | awk -F\:: '{ print $1 }')
+  echo $ext_deps
+}
+
+### get filenames list ###
+function get_filenames_list {
+  printf '\n ----------------------------------------------------\n'
+  printf ' [ * ] Get filenames'
+  i=0
+  for fpkg in ${file_pkg[@]}; do
+    name_pkg[$i]=$(get_filename $fpkg)
+    flag_set[$i]=false
+    (( i++ ))
+  done
+  if [[ "${debug}" == "yes" ]]; then
+    printf '\n ----------------------------------------------------\n'
+    printf '  %s\n' "${name_pkg[@]}"
+  fi
+  printf ' ... [ OK ]\n'
+}
+
+### create package dependencies list ###
+function create_pkg_dep_list {
+  printf ' ----------------------------------------------------\n'
+  printf ' [ * ] Get package dependencies'
+  i=0
+  for fpkg in ${file_pkg[@]}; do
+    deps_pkg[$i]=$(extract_pkg_deps $fpkg ${name_pkg[@]})
+    if [[ "${deps_pkg[$i]}" == "" ]]; then
+      flag_dep[$i]=false
+      if [[ "${debug}" == "yes" ]]; then
+        if [[ $i == 0 ]]; then printf '\n'; fi
+        printf ' ----------------------------------------------------\n'
+        printf '  %s [ false ]\n' "${fpkg}"
+      fi
+    else
+      flag_dep[$i]=true
+      if [[ "${debug}" == "yes" ]]; then
+        if [[ $i == 0 ]]; then printf '\n'; fi
+        printf ' ----------------------------------------------------\n'
+        printf '  %s [ true ]:\n' "${fpkg}"
+        for pdep in ${deps_pkg[$i]}; do
+          printf '    [ %s ]\n' "${pdep}"
+        done
+      fi
+    fi
+    (( i++ ))
+  done
+  printf ' ... [ OK ]\n'
+}
+
+### check if all the required packages are in the input list
+function check_pkg_list {
+  printf ' ----------------------------------------------------\n'
+  printf ' [ * ] Check if all dependencies are in list'
+  for dpkg in ${deps_pkg[@]}; do
+    found_pkg=false
+    for npkg in ${name_pkg[@]}; do
+      if [[ $dpkg == $npkg ]]; then
+        found_pkg=true
+      fi
+    done
+    if [[ $found_pkg != true ]]; then
+      printf ' ... [ Error ]: Package %s is not found' "${dpkg}"
+      exit 1
+    fi
+  done
+  printf ' ... [ OK ]\n'
+}
+
+### insert packages without dependencies ###
+#function
+
+get_filenames_list
+create_pkg_dep_list
+check_pkg_list
+
+if [[ "${debug}" == "yes" ]]; then
+  for idx in ${!file_pkg[@]}; do
+    printf ' ----------------------------------------------------\n'
+    printf '  File : %s\n' "${file_pkg[$idx]}"
+    printf '  Name : %s\n' "${name_pkg[$idx]}"
+    printf '  Deps : [ %s ] %s\n' "${flag_dep[$idx]}" "${deps_pkg[$idx]}"
+  done
+fi
