@@ -25,7 +25,8 @@ declare -a flag_set
 declare -a flag_req
 declare -a flag_dep
 
-debug="yes"
+show_info="yes"
+debug="no"
 
 ### get filename ###
 function get_filename () {
@@ -55,7 +56,7 @@ function get_filenames_list {
     printf '\n ----------------------------------------------------\n'
     printf '  %s\n' "${name_pkg[@]}"
   fi
-  printf ' ... [ OK ]\n'
+  printf ' ... OK\n'
 }
 
 ### create package dependencies list ###
@@ -85,7 +86,7 @@ function create_pkg_dep_list {
     fi
     (( i++ ))
   done
-  printf ' ... [ OK ]\n'
+  printf ' ... OK\n'
 }
 
 ### check if all the required packages are in the input list
@@ -104,21 +105,32 @@ function check_pkg_list {
       exit 1
     fi
   done
-  printf ' ... [ OK ]\n'
+  printf ' ... OK\n'
 }
 
 ### insert packages without dependencies ###
-#function
+function set_no_dep_pkg {
+  printf ' ----------------------------------------------------\n'
+  printf ' [ * ] Append packages with no dependencies'
+  printf ' ... OK\n'
+}
+
+function show_pkg_info {
+  printf ' ----------------------------------------------------\n'
+  printf ' [ * ] Print packages information\n'
+  for idx in ${!file_pkg[@]}; do
+    printf ' ----------------------------------------------------\n'
+    printf '  File         : %s\n' "${file_pkg[$idx]}"
+    printf '  Package      : %s\n' "${name_pkg[$idx]}"
+    printf '  Dependencies : [ %s ] %s\n' "${flag_dep[$idx]}" "${deps_pkg[$idx]}"
+  done
+}
 
 get_filenames_list
 create_pkg_dep_list
 check_pkg_list
+set_no_dep_pkg
 
-if [[ "${debug}" == "yes" ]]; then
-  for idx in ${!file_pkg[@]}; do
-    printf ' ----------------------------------------------------\n'
-    printf '  File : %s\n' "${file_pkg[$idx]}"
-    printf '  Name : %s\n' "${name_pkg[$idx]}"
-    printf '  Deps : [ %s ] %s\n' "${flag_dep[$idx]}" "${deps_pkg[$idx]}"
-  done
+if [[ "${show_info}" == "yes" ]]; then
+  show_pkg_info
 fi
