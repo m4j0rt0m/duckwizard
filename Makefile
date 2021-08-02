@@ -18,6 +18,8 @@ SYNTHESIS_DIR           = $(TOP_DIR)/synthesis
 SIMULATION_DIR          = $(TOP_DIR)/simulation
 FPGA_TEST_DIR           = $(TOP_DIR)/fpga
 SCRIPTS_DIR             = $(TOP_DIR)/scripts
+DESIGN_RTL_DIR          = $(TOP_DIR)
+FILELIST                = $(TOP_DIR)/filelist.f
 
 ### external library source directory ###
 EXT_LIB_SOURCE_DIR     ?=
@@ -40,8 +42,9 @@ TOP_MODULE_FILE         = $(shell basename $(shell grep -i -w -r "module $(TOP_M
 ### sources wildcards ###
 VERILOG_SRC             = $(wildcard $(shell find $(RTL_DIRS) -type f \( -iname \*.v -o -iname \*.sv -o -iname \*.vhdl \)))
 VERILOG_HEADERS         = $(wildcard $(shell find $(INCLUDE_DIRS) -type f \( -iname \*.h -o -iname \*.vh -o -iname \*.svh -o -iname \*.sv -o -iname \*.v \)))
-PACKAGE_SRC             = $(wildcard $(shell find $(PACKAGE_DIRS) -type f \( -iname \*.sv \)))
+PACKAGE_SRC             = $(shell $(SCRIPTS_DIR)/order_sv_pkg $(wildcard $(shell find $(PACKAGE_DIRS) -type f \( -iname \*.sv \))))
 MEM_SRC                 = $(wildcard $(shell find $(MEM_DIRS) -type f \( -iname \*.bin -o -iname \*.hex \)))
+RTL_SRC                 = $(VERILOG_SRC) $(VERILOG_HEADERS) $(PACKAGE_SRC) $(MEM_SRC)
 
 ### makefile includes ###
 include $(SCRIPTS_DIR)/config.mk
@@ -81,7 +84,7 @@ LINT                    = $(SPYGLASS_LINT)
 LINT_FLAGS              = --top $(TOP_MODULE) --files $(subst $(TOP_DIR)/,,$(VERILOG_SRC)) --includes $(subst $(TOP_DIR)/,,$(RTL_PATHS)) --sv --license $(RTL_LINTER_LICENSE) $(LINTER_REMOTE_OPTION) $(LINTER_ENV_OPTION) $(SPYGLASS_WAIVER_OPTION) --move --debug
 else
 LINT                    = $(VERILATOR_LINT)
-LINT_FLAGS              = --lint-only $(VERILATOR_LINT_SV_FLAGS) $(VERILATOR_LINT_W_FLAGS) --quiet-exit --error-limit 200 $(VERILATOR_CONFIG_FILE) $(PACKAGE_SRC) $(INCLUDES_FLAGS) $(TOP_MODULE_FILE)
+LINT_FLAGS              = --lint-only $(VERILATOR_LINT_SV_FLAGS) $(VERILATOR_LINT_W_FLAGS) --quiet-exit --error-limit 200 $(VERILATOR_CONFIG_FILE) $(INCLUDES_FLAGS) $(PACKAGE_SRC) $(TOP_MODULE_FILE)
 endif
 
 #H# all                 : Run linter, FPGA synthesis and simulation
@@ -329,6 +332,11 @@ env-dirs:
 init-repo:
 	@git submodule update --init --recursive
 
+#H# filelist            : Create filelist.f
+filelist: $(RTL_SRC)
+	$(call print-filelist,$(FILELIST),$(TOP_DIR))
+	@echo -e "\n\u2714 [OK] Written into $(FILELIST)"
+
 #H# rm-git-db           : Remove GIT databases (.git and .gitmodules)
 rm-git-db: init-repo
 	$(eval remote-url=$(shell git config --get remote.origin.url))
@@ -354,4 +362,4 @@ help-all: help
 	@$(MAKE) -C $(FPGA_TEST_DIR)/lattice help
 	@$(MAKE) -C $(SIMULATION_DIR) help
 
-.PHONY: all lint rtl-synth rtl-sim fpga-test print-rtl-srcs print-config check-config clean clean-all del-bak help help-all
+.PHONY: all lint lint-module rtl-synth rtl-sim fpga-test fpga-flash print-rtl-srcs print-config filelist env-dirs check-config veritedium clean clean-all del-bak help help-all
