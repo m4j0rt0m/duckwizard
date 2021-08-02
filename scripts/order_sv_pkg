@@ -27,7 +27,7 @@ declare -a flag_dep
 declare -a sv_pkg
 declare -a sv_file_pkg
 
-show_info="yes"
+show_info="no"
 verbose="no"
 
 ### get filename ###
@@ -185,17 +185,21 @@ function show_pkg_info {
     printf '  Dependencies : [ %d ] %s\n' "${flag_dep[$idx]}" "${deps_pkg[$idx]}"
   done
   printf ' ----------------------------------------------------\n'
-  printf '  [ %s ]\n' "${sv_pkg[@]}"
+  printf '  Ordered packages names:\n'
+  printf '   [*] %s\n' "${sv_pkg[@]}"
   printf ' ----------------------------------------------------\n'
-  printf '  [ %s ]\n' "${sv_file_pkg[@]}"
+  printf '  Ordered packages files:\n'
+  printf '   [*] %s\n' "${sv_file_pkg[@]}"
 }
 
-get_filenames_list
-create_pkg_dep_list
-check_pkg_list
-set_no_dep_pkg
-set_dep_pkg
+function main {
+  get_filenames_list
+  create_pkg_dep_list
+  check_pkg_list
+  set_no_dep_pkg
+  set_dep_pkg
+  if [[ "${show_info}" == "yes" ]]; then show_pkg_info; fi
+  echo "${sv_file_pkg[@]}"
+}
 
-if [[ "${show_info}" == "yes" ]]; then
-  show_pkg_info
-fi
+main
