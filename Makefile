@@ -1,1 +1,1 @@
-include duckwizard.mk
+include duckWizard.mk
