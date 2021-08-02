@@ -1,6 +1,6 @@
 ./duckWizard.mk
 ./duckWizard.md
-./scripts/filelist
+./scripts/duckWizard.list
 ./scripts/config.mk
 ./scripts/copy_files
 ./scripts/update-submodules
