@@ -1,6 +1,6 @@
 # Author:      Abraham J. Ruiz R.
 # Description: Main project Makefile for linting, synthesis, simulation ant testing features
-# Version:     1.1
+# Version:     1.2
 # Url:         https://github.com/m4j0rt0m/duckwizard
 
 ### header flags ###
@@ -20,6 +20,7 @@ FPGA_TEST_DIR           = $(TOP_DIR)/fpga
 SCRIPTS_DIR             = $(TOP_DIR)/scripts
 DESIGN_RTL_DIR          = $(TOP_DIR)
 FILELIST                = $(TOP_DIR)/filelist.f
+DUCKWIZARD_FILES        = $(SCRIPTS_DIR)/duckWizard.list
 
 ### external library source directory ###
 EXT_LIB_SOURCE_DIR     ?=
@@ -353,7 +354,8 @@ update-files:
 	git clone $(REMOTE-URL-HTTPS) .rtl-template -b feature/update-files && \
 	cd .rtl-template && \
 	git submodule update --init --recursive && \
-	scripts/copy_files scripts/filelist $(TOP_DIR) && \
+	scripts/copy_files $(DUCKWIZARD_FILES) $(TOP_DIR) && \
+	scripts/restore_config project.config $(CONFIG_FILE) && \
 	cd .. && rm -rf .rtl-template
 
 #H# help                : Display help
