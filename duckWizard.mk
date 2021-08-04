@@ -355,7 +355,7 @@ update-files:
 	cd .rtl-template && \
 	git submodule update --init --recursive && \
 	scripts/copy_files $(DUCKWIZARD_FILES) $(TOP_DIR) && \
-	scripts/restore_config project.config $(CONFIG_FILE)
+	scripts/restore_config project.config $(CONFIG_FILE) && \
 	cd .. && rm -rf .rtl-template
 
 #H# help                : Display help
