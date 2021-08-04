@@ -1,6 +1,6 @@
 # Author:      Abraham J. Ruiz R.
 # Description: Main project Makefile for linting, synthesis, simulation ant testing features
-# Version:     1.1
+# Version:     1.2
 # Url:         https://github.com/m4j0rt0m/duckwizard
 
 ### header flags ###
@@ -355,6 +355,7 @@ update-files:
 	cd .rtl-template && \
 	git submodule update --init --recursive && \
 	scripts/copy_files $(DUCKWIZARD_FILES) $(TOP_DIR) && \
+	scripts/restore_config project.config $(CONFIG_FILE)
 	cd .. && rm -rf .rtl-template
 
 #H# help                : Display help
