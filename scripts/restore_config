@@ -1,0 +1,67 @@
+#!/bin/bash
+
+config_old=$1
+config_new=$2
+
+config_options=(
+  'project'
+  'rtl_top'
+  'rtl_linter'
+  'rtl_synth_tools'
+  'sim_tool'
+  'fpga_test'
+  'fpga_sim_test'
+  'fpga_sim_tool'
+  'rtl_linter_license'
+  'rtl_linter_remote'
+  'rtl_linter_remote_ip'
+  'rtl_linter_env_source'
+  'rtl_synth_uses_clk'
+  'rtl_synth_clk_src'
+  'rtl_synth_quartus_target'
+  'rtl_synth_quartus_device'
+  'rtl_synth_quartus_clk_mhz'
+  'rtl_synth_yosys_target'
+  'rtl_synth_yosys_device'
+  'rtl_synth_yosys_clk_mhz'
+  'rtl_synth_yosys_pnr_tool'
+  'sim_modules'
+  'sim_create_vcd'
+  'sim_open_wave'
+  'fpga_top'
+  'fpga_virtual_pins'
+  'fpga_board_test'
+  'fpga_uses_clk'
+  'fpga_clk_src'
+  'fpga_synth_altera'
+  'fpga_synth_lattice'
+  'fpga_altera_target'
+  'fpga_altera_device'
+  'fpga_altera_package'
+  'fpga_altera_min_temp'
+  'fpga_altera_max_temp'
+  'fpga_altera_clk_mhz'
+  'fpga_lattice_target'
+  'fpga_lattice_device'
+  'fpga_lattice_package'
+  'fpga_lattice_clk_mhz'
+  'fpga_lattice_pnr_tool'
+  'fpga_sim_inc_main_sim_dir'
+  'fpga_sim_create_vcd'
+  'fpga_sim_open_wave'
+  'fpga_sim_modules_altera'
+  'fpga_sim_modules_lattice'
+)
+
+# recover old config entries
+for config in ${config_options[@]}; do
+  config_entry="^\[\*\] ${config} ="
+  old_value=$(grep -w [*] $1 | grep -w ${config} | cut -d'=' -f 2 | cut -c2-)
+  if [[ "${old_value}" != "" ]]; then
+    res_config="\[\*\] ${config} = ${old_value}"
+    sed -i "s/${config_entry}.*/$res_config/" $2
+  fi
+done
+
+# copy new project.config
+cp -v $2 $1
