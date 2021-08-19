@@ -11,13 +11,14 @@ REMOTE-URL-HTTPS       := https://github.com/m4j0rt0m/duckwizard.git
 ### top directory ###
 MKFILE_PATH             = $(abspath $(firstword $(MAKEFILE_LIST)))
 TOP_DIR                 = $(shell dirname $(MKFILE_PATH))
+DUCKWIZARD_DIR          = $(TOP_DIR)/.duckwizard
 
 ### directories ###
 SOURCE_DIR              = $(TOP_DIR)/src
 SYNTHESIS_DIR           = $(TOP_DIR)/synthesis
 SIMULATION_DIR          = $(TOP_DIR)/simulation
 FPGA_TEST_DIR           = $(TOP_DIR)/fpga
-SCRIPTS_DIR             = $(TOP_DIR)/scripts
+SCRIPTS_DIR             = $(DUCKWIZARD_DIR)/scripts
 DESIGN_RTL_DIR          = $(TOP_DIR)
 FILELIST                = $(TOP_DIR)/filelist.f
 DUCKWIZARD_FILES        = $(SCRIPTS_DIR)/duckWizard.list
@@ -362,12 +363,12 @@ update-files:
 	git clone $(REMOTE-URL-HTTPS) .rtl-template -b feature/update-files && \
 	cd .rtl-template && \
 	git submodule update --init --recursive && \
-	scripts/copy_files $(DUCKWIZARD_FILES) $(TOP_DIR) && \
-	scripts/restore_config project.config $(CONFIG_FILE) && \
+	$(SCRIPTS_DIR)/copy_files $(DUCKWIZARD_FILES) $(TOP_DIR) && \
+	$(SCRIPTS_DIR)/restore_config project.config $(CONFIG_FILE) && \
 	cd .. && rm -rf .rtl-template
 
 #H# help                : Display help
-help: Makefile scripts/misc.mk
+help: Makefile $(SCRIPTS_DIR)/misc.mk
 	@echo -e "\nHelp!...(8)\n"
 	@sed -n 's/^#H#//p' $^
 	@echo ""

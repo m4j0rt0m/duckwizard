@@ -1,1 +1,1 @@
-duckWizard.md
+.duckwizard/README.md
