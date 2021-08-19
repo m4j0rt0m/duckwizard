@@ -104,4 +104,4 @@ check-config:
 ### supported stuff flags ###
 SUPPORTED_SYNTHESIS  = quartus yosys
 SUPPORTED_FPGA_TEST  = altera lattice
-SUPPORTED_SIMULATION = iverilog spyglass
+SUPPORTED_SIMULATION = iverilog
