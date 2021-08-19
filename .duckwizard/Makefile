@@ -360,10 +360,10 @@ rm-git-db: init-repo
 
 #H# update-files        : Update files from template to the project structure
 update-files:
-	git clone $(REMOTE-URL-HTTPS) .rtl-template -b feature/update-files && \
+	git clone $(REMOTE-URL-HTTPS) .rtl-template && \
 	cd .rtl-template && \
 	git submodule update --init --recursive && \
-	$(SCRIPTS_DIR)/copy_files $(DUCKWIZARD_FILES) $(DUCKWIZARD_DIR) && \
+	$(SCRIPTS_DIR)/copy_files $(DUCKWIZARD_FILES) $(TOP_DIR) && \
 	$(SCRIPTS_DIR)/restore_config project.config $(CONFIG_FILE) && \
 	cd .. && rm -rf .rtl-template
 
