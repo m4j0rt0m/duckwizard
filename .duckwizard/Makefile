@@ -11,13 +11,14 @@ REMOTE-URL-HTTPS       := https://github.com/m4j0rt0m/duckwizard.git
 ### top directory ###
 MKFILE_PATH             = $(abspath $(firstword $(MAKEFILE_LIST)))
 TOP_DIR                 = $(shell dirname $(MKFILE_PATH))
+DUCKWIZARD_DIR          = $(TOP_DIR)/.duckwizard
 
 ### directories ###
 SOURCE_DIR              = $(TOP_DIR)/src
 SYNTHESIS_DIR           = $(TOP_DIR)/synthesis
 SIMULATION_DIR          = $(TOP_DIR)/simulation
 FPGA_TEST_DIR           = $(TOP_DIR)/fpga
-SCRIPTS_DIR             = $(TOP_DIR)/scripts
+SCRIPTS_DIR             = $(DUCKWIZARD_DIR)/scripts
 DESIGN_RTL_DIR          = $(TOP_DIR)
 FILELIST                = $(TOP_DIR)/filelist.f
 DUCKWIZARD_FILES        = $(SCRIPTS_DIR)/duckWizard.list
@@ -171,7 +172,7 @@ rtl-sim:
 				do\
 					smodule=$${smodule_list[$$sidx]};\
 					echo -e "$(_flag_)\n [*] Simulating Top Module : $${smodule}\n$(_reset_)";\
-					$(MAKE) -C $(SIMULATION_DIR) sim\
+					$(MAKE) -C $(SIMULATION_DIR)/$${stool} sim\
 						SIM_TOP_MODULE=$${smodule}\
 						SIM_TOOL=$${stool}\
 						SIM_CREATE_VCD=$(SIM_CREATE_VCD)\
@@ -204,11 +205,11 @@ fpga-test:
 			echo -e "  |-> Device     : $${!fpga_device}";\
 			echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
 			$(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} $${ftest}-project\
-			  EXT_VERILOG_SRC="$(VERILOG_SRC)"\
-			  EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
-			  EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
-			  EXT_MEM_SRC="$(MEM_SRC)"\
-			  EXT_RTL_PATHS="$(RTL_PATHS)";\
+				EXT_VERILOG_SRC="$(VERILOG_SRC)"\
+				EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
+				EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
+				EXT_MEM_SRC="$(MEM_SRC)"\
+				EXT_RTL_PATHS="$(RTL_PATHS)";\
 		done;\
 	fi
 
@@ -261,11 +262,11 @@ fpga-flash:
 			echo -e "  |-> Device     : $${!fpga_device}";\
 			echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
 			$(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} $${ftest}-flash-fpga\
-			  EXT_VERILOG_SRC="$(VERILOG_SRC)"\
-			  EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
-			  EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
-			  EXT_MEM_SRC="$(MEM_SRC)"\
-			  EXT_RTL_PATHS="$(RTL_PATHS)";\
+				EXT_VERILOG_SRC="$(VERILOG_SRC)"\
+				EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
+				EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
+				EXT_MEM_SRC="$(MEM_SRC)"\
+				EXT_RTL_PATHS="$(RTL_PATHS)";\
 		done;\
 	fi
 
@@ -282,11 +283,11 @@ lint-fpga-test:
 			echo -e "$(_flag_)\n [*] Running linter for $${ftest^} FPGA test";\
 			echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
 			$(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} lint\
-			  EXT_VERILOG_SRC="$(VERILOG_SRC)"\
-			  EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
-			  EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
-			  EXT_MEM_SRC="$(MEM_SRC)"\
-			  EXT_RTL_PATHS="$(RTL_PATHS)";\
+				EXT_VERILOG_SRC="$(VERILOG_SRC)"\
+				EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
+				EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
+				EXT_MEM_SRC="$(MEM_SRC)"\
+				EXT_RTL_PATHS="$(RTL_PATHS)";\
 		done;\
 	fi
 
@@ -296,12 +297,17 @@ clean: del-bak
 
 #H# clean-all           : Clean all the build directories
 clean-all: clean
-	@if [ -d $(SIMULATION_DIR) ]; then $(MAKE) -C $(SIMULATION_DIR) clean; fi
 	@syn_tool_list=($(SUPPORTED_SYNTHESIS));\
 	for sidx in `seq 0 $$(($${#syn_tool_list[@]}-1))`;\
 	do\
 		stool=$${syn_tool_list[$$sidx]};\
 		if [ -d $(SYNTHESIS_DIR)/$${stool} ]; then $(MAKE) -C $(SYNTHESIS_DIR)/$${stool} clean; fi;\
+	done
+	@sim_tool_list=($(SUPPORTED_SIMULATION));\
+	for sidx in `seq 0 $$(($${#sim_tool_list[@]}-1))`;\
+	do\
+		stool=$${sim_tool_list[$$sidx]};\
+		if [ -d $(SIMULATION_DIR)/$${stool} ]; then $(MAKE) -C $(SIMULATION_DIR)/$${stool} clean; fi;\
 	done
 	@fpga_test_list=($(SUPPORTED_FPGA_TEST));\
 	for fidx in `seq 0 $$(($${#fpga_test_list[@]}-1))`;\
@@ -320,7 +326,10 @@ env-dirs:
 		done;\
 	fi
 	@if [[ "$(SIM_TOOL)" != "" ]]; then\
-		$(MAKE) check-dir-env RTL_ENV_FEATURE=simulation;\
+		for stool in $(SIM_TOOL);\
+		do\
+			$(MAKE) check-dir-env RTL_ENV_FEATURE=simulation RTL_ENV_SUBFEATURE=$${stool};\
+		done;\
 	fi
 	@if [[ "$(FPGA_TEST)" != "" ]]; then\
 		for ftest in $(FPGA_TEST);\
@@ -354,12 +363,12 @@ update-files:
 	git clone $(REMOTE-URL-HTTPS) .rtl-template -b feature/update-files && \
 	cd .rtl-template && \
 	git submodule update --init --recursive && \
-	scripts/copy_files $(DUCKWIZARD_FILES) $(TOP_DIR) && \
-	scripts/restore_config project.config $(CONFIG_FILE) && \
+	$(SCRIPTS_DIR)/copy_files $(DUCKWIZARD_FILES) $(TOP_DIR) && \
+	$(SCRIPTS_DIR)/restore_config project.config $(CONFIG_FILE) && \
 	cd .. && rm -rf .rtl-template
 
 #H# help                : Display help
-help: Makefile scripts/misc.mk
+help: Makefile $(SCRIPTS_DIR)/misc.mk
 	@echo -e "\nHelp!...(8)\n"
 	@sed -n 's/^#H#//p' $^
 	@echo ""
