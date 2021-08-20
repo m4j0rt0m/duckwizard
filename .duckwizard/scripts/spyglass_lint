@@ -7,9 +7,6 @@
 #                 remote or local execution of the SpyGlass linter.     #
 # Author(s)     : Abraham J. Ruiz R.                                    #
 #                   abraham.j.ruiz.r@gmail.com; abraham.ruiz@bsc.es     #
-# Contributions : Jonnatan E. Mendoza E.                                #
-#                   jonnatan.mendoza@bsc.es                             #
-# Organization  : Barcelona Supercomputing Center (BSC)                 #
 # Version       : v2.0 - 01/02/2021                                     #
 # Notes         : If using remote linting feature, be sure to be able   #
 #                 to connect passwordless via ssh to REMOTE_SERVER.     #
