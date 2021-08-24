@@ -1,0 +1,12 @@
+./.duckwizard/Makefile
+./.duckwizard/README.md
+./.duckwizard/scripts/duckWizard.list
+./.duckwizard/scripts/config.mk
+./.duckwizard/scripts/copy_files
+./.duckwizard/scripts/update-submodules
+./.duckwizard/scripts/funct.mk
+./.duckwizard/scripts/spyglass_lint
+./.duckwizard/scripts/misc.mk
+./.duckwizard/scripts/order_sv_pkg
+./.duckwizard/scripts/parse_config
+./.duckwizard/scripts/pull-feature-repo-files
