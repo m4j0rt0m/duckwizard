@@ -368,7 +368,7 @@ update-files:
 	cd .. && rm -rf .rtl-template
 
 #H# help                : Display help
-help: Makefile $(SCRIPTS_DIR)/misc.mk
+help: $(DUCKWIZARD_DIR)/Makefile $(SCRIPTS_DIR)/misc.mk
 	@echo -e "\nHelp!...(8)\n"
 	@sed -n 's/^#H#//p' $^
 	@echo ""
