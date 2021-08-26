@@ -12,6 +12,8 @@ SIM_TOOL                  ?= $(shell $(PARSE_CONFIG) sim_tool)
 FPGA_TEST                 ?= $(shell $(PARSE_CONFIG) fpga_test)
 FPGA_SIM_TEST             ?= $(shell $(PARSE_CONFIG) fpga_sim_test)
 FPGA_SIM_TOOL             ?= $(shell $(PARSE_CONFIG) fpga_sim_tool)
+# - sv2v usage
+USE_SV2V                  ?= $(shell $(PARSE_CONFIG) use_sv2v)
 # - rtl-lint
 RTL_LINTER_LICENSE        ?= $(shell $(PARSE_CONFIG) rtl_linter_license)
 RTL_LINTER_REMOTE         ?= $(shell $(PARSE_CONFIG) rtl_linter_remote)
@@ -64,6 +66,7 @@ FPGA_SIM_MODULES_LATTICE  ?= $(shell $(PARSE_CONFIG) fpga_sim_modules_lattice)
 ### export variables ###
 export CONFIG_FILE
 export PROJECT
+export USE_SV2V
 export RTL_LINTER
 export RTL_LINTER_LICENSE
 export RTL_LINTER_REMOTE
