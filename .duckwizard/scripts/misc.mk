@@ -91,6 +91,10 @@ check-dir-env:
 		$(SCRIPTS_DIR)/pull-feature-repo-files $(RTL_ENV_FEATURE_GIT) $(RTL_ENV_FEATURE_DIR);\
 	fi
 
+#H# install-sv2v        : Install sv2v tool (SystemVerilog to Verilog code conversion tool)
+install-sv2v:
+	@$(SCRIPTS_DIR)/install-sv2v
+
 #H# del-bak             : Delete backup files
 del-bak:
 	find ./* -name "*~" -delete
