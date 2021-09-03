@@ -1,0 +1,80 @@
+#!/bin/bash
+
+#########################################################################
+#                                                                       #
+# Script Name   : install-sv2v                                          #
+# Description   : Install helper for sv2v [www.github.com/zachjs/sv2v]  #
+# Author(s)     : Abraham J. Ruiz R. [www.github.com/m4j0rt0m]          #
+#                   abraham.j.ruiz.r@gmail.com                          #
+# Version       : v1.0 - 25/08/2021                                     #
+# Future Work   : Optimize this!                                        #
+#                                                                       #
+#########################################################################
+
+env_source_script=${HOME}/.bashrc
+sv2v_repo="https://github.com/zachjs/sv2v.git"
+sv2v_temp=".sv2v"
+
+get_install_flag() {
+  read -p "Install sv2v binary in ${HOME}/.local/bin ? (y/n): " install_flag
+}
+
+get_add_flag() {
+  read -p "Add sv2v to PATH ? (y/n): " add_flag
+}
+
+enter_valid_input() {
+  echo "[!] Enter \"y\", \"n\", \"yes\" or \"no\"!"
+}
+
+install_stack() {
+  curl -sSL https://get.haskellstack.org/ | sh
+  echo "Info: Finished installing Haskell Stack!"
+}
+
+install_sv2v() {
+  git clone ${sv2v_repo} ${sv2v_temp}
+  cd ${sv2v_temp}
+  make
+  stack install
+  cd ../
+  rm -rf ${sv2v_temp}
+  echo "Info: Finished installing sv2v!"
+}
+
+add_sv2v_to_path() {
+  echo "export PATH=\$PATH:\$HOME/.local/bin" >> $env_source_script
+}
+
+# check for haskell stack
+if ! [ -x "$(command -v stack)" ]; then
+  echo 'Info: Haskell Stack is not installed... Installing...'
+  install_stack
+else
+  echo 'Info: Haskell Stack is found.'
+fi
+
+# check for sv2v
+if ! [ -x "$(command -v sv2v)" ]; then
+  echo 'Info: sv2v is not installed or is not in PATH.'
+  get_install_flag
+  while [[ "${install_flag}" != "y" ]] && [[ "${install_flag}" != "n" ]] && [[ "${install_flag}" != "yes" ]] && [[ "${install_flag}" != "no" ]]; do
+    enter_valid_input
+    get_install_flag
+  done
+  if [[ "${install_flag}" == "y" ]] || [[ "${install_flag}" == "yes" ]]; then
+    install_sv2v
+    get_add_flag
+    while [[ "${add_flag}" != "y" ]] && [[ "${add_flag}" != "n" ]] && [[ "${add_flag}" != "yes" ]] && [[ "${add_flag}" != "no" ]]; do
+      enter_valid_input
+      get_add_flag
+    done
+    if [[ "${add_flag}" == "y" ]] || [[ "${add_flag}" == "yes" ]]; then
+      add_sv2v_to_path
+      echo "Info: Added to ${env_source_script}"
+      echo "Info: Run \"source ${env_source_script}\" or open a new terminal."
+    fi
+  fi
+else
+  echo 'Info: sv2v is already installed.'
+fi

@@ -22,6 +22,13 @@ export _segment_
 RTL_ENV_FEATURE_GIT:=$(subst .git,$(if $(RTL_ENV_SUBFEATURE),-$(RTL_ENV_FEATURE)-$(RTL_ENV_SUBFEATURE).git,-$(RTL_ENV_FEATURE).git),$(REMOTE-URL-HTTPS))
 RTL_ENV_FEATURE_DIR:=$(if $(RTL_ENV_SUBFEATURE),$(RTL_ENV_FEATURE)/$(RTL_ENV_SUBFEATURE),$(RTL_ENV_FEATURE))
 
+### check sv2v
+ifeq (, $(shell which sv2v))
+SV2V_IN_PATH:=false
+else
+SV2V_IN_PATH:=true
+endif
+
 #H# print-config        : Display project configuration
 print-config: check-config
 	@echo -e "$(_info_)\n[INFO] Project Configuration File$(_reset_)";\
@@ -90,6 +97,17 @@ check-dir-env:
 	@if [ ! -d $(RTL_ENV_FEATURE_DIR) ]; then\
 		$(SCRIPTS_DIR)/pull-feature-repo-files $(RTL_ENV_FEATURE_GIT) $(RTL_ENV_FEATURE_DIR);\
 	fi
+
+#H# check-sv2v          : Check if sv2v tool is installed
+check-sv2v:
+	@if [[ "$(SV2V_IN_PATH)" != true ]]; then\
+		echo " [!] sv2v is not installed nor in PATH, running install-helper...";\
+		$(MAKE) install-sv2v;\
+	fi
+
+#H# install-sv2v        : Install sv2v tool (SystemVerilog to Verilog code conversion tool)
+install-sv2v:
+	@$(SCRIPTS_DIR)/install-sv2v
 
 #H# del-bak             : Delete backup files
 del-bak:
