@@ -177,7 +177,13 @@ endif
 	fi
 
 #H# rtl-sim             : Run RTL simulation
+ifeq ($(USE_SV2V),yes)
+rtl-sim: sv2v-srcs
+	$(MAKE) SV2V_RERUN=yes rtl-sim-run
+rtl-sim-run:
+else
 rtl-sim:
+endif
 	@echo -e "$(_info_)\n[INFO] RTL Simulation\n$(_reset_)";\
 	if [[ "$(SIM_TOOL)" == "" ]]; then\
 		echo -e "$(_error_)[ERROR] No defined RTL simulation tool! Define \"SIM_TOOL\" environment variable or define it in the \"project.config\" file.$(_reset_)";\
