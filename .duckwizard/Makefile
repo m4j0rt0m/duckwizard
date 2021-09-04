@@ -125,8 +125,7 @@ lint: print-rtl-srcs
 		echo -e "$(_error_)[ERROR] No defined top module!$(_reset_)";\
 	else\
 		echo -e "$(_info_)\n[INFO] Linting using $(LINT) tool$(_reset_)";\
-		for tmodule in $(TOP_MODULE);\
-		do\
+		for tmodule in $(TOP_MODULE); do\
 			$(MAKE) lint-module TOP_MODULE=$${tmodule};\
 		done;\
 	fi
@@ -151,8 +150,7 @@ endif
 		echo -e "$(_error_)[ERROR] No defined RTL synthesis tool! Define \"RTL_SYN_TOOLS\" environment variable or define it in the \"project.config\" file."$(_reset_);\
 	else\
 		stool_list=($(RTL_SYN_TOOLS));\
-		for sidx in `seq 0 $$(($${#stool_list[@]}-1))`;\
-		do\
+		for sidx in `seq 0 $$(($${#stool_list[@]}-1))`; do\
 			stool=$${stool_list[$$sidx]};\
 			$(MAKE) check-dir-env RTL_ENV_FEATURE=synthesis RTL_ENV_SUBFEATURE=$${stool};\
 			if [[ "$(TOP_MODULE)" == "" ]]; then\
@@ -160,8 +158,7 @@ endif
 			else\
 				echo -e "$(_info_)\n[INFO] Running $${stool} synthesis tool$(_reset_)";\
 				tmodule_list=($(TOP_MODULE));\
-				for tidx in `seq 0 $$(($${#tmodule_list[@]}-1))`;\
-				do\
+				for tidx in `seq 0 $$(($${#tmodule_list[@]}-1))`; do\
 					tmodule=$${tmodule_list[$$tidx]};\
 					echo -e "$(_flag_)\n [*] Synthesis Top Module : $${tmodule}\n$(_reset_)";\
 					$(MAKE) -C $(SYNTHESIS_DIR)/$${stool} rtl-synth\
@@ -183,8 +180,7 @@ rtl-sim:
 		echo -e "$(_error_)[ERROR] No defined RTL simulation tool! Define \"SIM_TOOL\" environment variable or define it in the \"project.config\" file.$(_reset_)";\
 	else\
 		stool_list=($(SIM_TOOL));\
-		for sidx in `seq 0 $$(($${#stool_list[@]}-1))`;\
-		do\
+		for sidx in `seq 0 $$(($${#stool_list[@]}-1))`; do\
 			stool=$${stool_list[$$sidx]};\
 			$(MAKE) check-dir-env RTL_ENV_FEATURE=simulation;\
 			if [[ "$(SIM_MODULES)" == "" ]]; then\
@@ -192,8 +188,7 @@ rtl-sim:
 			else\
 				echo -e "$(_info_)[INFO] Simulation with $${stool} tool\n$(_reset_)";\
 				smodule_list=($(SIM_MODULES));\
-				for sidx in `seq 0 $$(($${#smodule_list[@]}-1))`;\
-				do\
+				for sidx in `seq 0 $$(($${#smodule_list[@]}-1))`; do\
 					smodule=$${smodule_list[$$sidx]};\
 					echo -e "$(_flag_)\n [*] Simulating Top Module : $${smodule}\n$(_reset_)";\
 					$(MAKE) -C $(SIMULATION_DIR)/$${stool} sim\
@@ -220,8 +215,7 @@ fpga-test:
 		echo -e "$(_error_)[ERROR] No defined FPGA test! Define it in the \"project.config\" file.$(_reset_)";\
 	else\
 		ftest_list=($(FPGA_TEST));\
-		for fidx in `seq 0 $$(($${#ftest_list[@]}-1))`;\
-		do\
+		for fidx in `seq 0 $$(($${#ftest_list[@]}-1))`; do\
 			ftest=$${ftest_list[$$fidx]};\
 			$(MAKE) check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
 			fpga_target=$${ftest^^}_TARGET;\
@@ -249,13 +243,11 @@ fpga-rtl-sim:
 	else\
 		fsim_list=($(FPGA_SIM_TEST));\
 		stool_list=($(FPGA_SIM_TOOL));\
-		for fidx in `seq 0 $$(($${#fsim_list[@]}-1))`;\
-		do\
+		for fidx in `seq 0 $$(($${#fsim_list[@]}-1))`; do\
 			fsim=$${fsim_list[$$fidx]};\
 			$(MAKE) check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${fsim};\
 			fsim_modules=FPGA_SIM_MODULES_$${fsim^^};\
-			for sidx in `seq 0 $$(($${#stool_list[@]}-1))`;\
-			do\
+			for sidx in `seq 0 $$(($${#stool_list[@]}-1))`; do\
 				stool=$${stool_list[$$sidx]};\
 				$(MAKE) -C $(FPGA_TEST_DIR)/$${fsim} fpga-rtl-sim\
 					FPGA_SIM_MODULES="$${!fsim_modules}"\
@@ -277,8 +269,7 @@ fpga-flash:
 		echo -e "$(_error_)\n[ERROR] No defined FPGA test! Define it in the \"project.config\" file.$(_reset_)";\
 	else\
 		ftest_list=($(FPGA_TEST));\
-		for fidx in `seq 0 $$(($${#ftest_list[@]}-1))`;\
-		do\
+		for fidx in `seq 0 $$(($${#ftest_list[@]}-1))`; do\
 			ftest=$${ftest_list[$$fidx]};\
 			$(MAKE) check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
 			fpga_target=$${ftest^^}_TARGET;\
@@ -302,8 +293,7 @@ lint-fpga-test:
 		echo -e "$(_error_)[ERROR] No defined FPGA test! Define it in the \"project.config\" file.$(_reset_)";\
 	else\
 		ftest_list=($(FPGA_TEST));\
-		for fidx in `seq 0 $$(($${#ftest_list[@]}-1))`;\
-		do\
+		for fidx in `seq 0 $$(($${#ftest_list[@]}-1))`; do\
 			ftest=$${ftest_list[$$fidx]};\
 			$(MAKE) check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
 			echo -e "$(_flag_)\n [*] Running linter for $${ftest^} FPGA test";\
@@ -324,20 +314,17 @@ clean: del-bak
 #H# clean-all           : Clean all the build directories
 clean-all: clean
 	@syn_tool_list=($(SUPPORTED_SYNTHESIS));\
-	for sidx in `seq 0 $$(($${#syn_tool_list[@]}-1))`;\
-	do\
+	for sidx in `seq 0 $$(($${#syn_tool_list[@]}-1))`; do\
 		stool=$${syn_tool_list[$$sidx]};\
 		if [ -d $(SYNTHESIS_DIR)/$${stool} ]; then $(MAKE) -C $(SYNTHESIS_DIR)/$${stool} clean; fi;\
 	done
 	@sim_tool_list=($(SUPPORTED_SIMULATION));\
-	for sidx in `seq 0 $$(($${#sim_tool_list[@]}-1))`;\
-	do\
+	for sidx in `seq 0 $$(($${#sim_tool_list[@]}-1))`; do\
 		stool=$${sim_tool_list[$$sidx]};\
 		if [ -d $(SIMULATION_DIR)/$${stool} ]; then $(MAKE) -C $(SIMULATION_DIR)/$${stool} clean; fi;\
 	done
 	@fpga_test_list=($(SUPPORTED_FPGA_TEST));\
-	for fidx in `seq 0 $$(($${#fpga_test_list[@]}-1))`;\
-	do\
+	for fidx in `seq 0 $$(($${#fpga_test_list[@]}-1))`; do\
 		ftest=$${fpga_test_list[$$fidx]};\
 		if [ -d $(FPGA_TEST_DIR)/$${ftest} ]; then $(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} clean; fi;\
 		if [ -d $(FPGA_TEST_DIR)/$${ftest}/simulation ]; then $(MAKE) -C $(FPGA_TEST_DIR)/$${ftest}/simulation clean; fi;\
@@ -346,20 +333,17 @@ clean-all: clean
 #H# env-dirs            : Create features environment directories (synthesis, fpga-test, simulation, etc.)
 env-dirs:
 	@if [[ "$(RTL_SYN_TOOLS)" != "" ]]; then\
-		for stool in $(RTL_SYN_TOOLS);\
-		do\
+		for stool in $(RTL_SYN_TOOLS); do\
 			$(MAKE) check-dir-env RTL_ENV_FEATURE=synthesis RTL_ENV_SUBFEATURE=$${stool};\
 		done;\
 	fi
 	@if [[ "$(SIM_TOOL)" != "" ]]; then\
-		for stool in $(SIM_TOOL);\
-		do\
+		for stool in $(SIM_TOOL); do\
 			$(MAKE) check-dir-env RTL_ENV_FEATURE=simulation RTL_ENV_SUBFEATURE=$${stool};\
 		done;\
 	fi
 	@if [[ "$(FPGA_TEST)" != "" ]]; then\
-		for ftest in $(FPGA_TEST);\
-		do\
+		for ftest in $(FPGA_TEST); do\
 			$(MAKE) check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
 		done;\
 	fi
