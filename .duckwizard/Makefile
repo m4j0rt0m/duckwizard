@@ -201,8 +201,10 @@ rtl-sim:
 						SIM_TOOL=$${stool}\
 						SIM_CREATE_VCD=$(SIM_CREATE_VCD)\
 						SIM_OPEN_WAVE=$(SIM_OPEN_WAVE)\
-						EXT_VERILOG_SRC="$(VERILOG_SRC) $(SVERILOG_SRC)"\
-						EXT_VERILOG_HEADERS="$(VERILOG_HEADERS) $(SVERILOG_HEADERS)"\
+						EXT_VERILOG_SRC="$(VERILOG_SRC)"\
+						EXT_SVERILOG_SRC="$(SVERILOG_SRC)"\
+						EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
+						EXT_SVERILOG_HEADERS="$(SVERILOG_HEADERS)"\
 						EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
 						EXT_MEM_SRC="$(MEM_SRC)"\
 						EXT_RTL_PATHS="$(RTL_PATHS)";\
@@ -364,6 +366,7 @@ env-dirs:
 
 #H# sv2v-srcs           : Convert RTL sources from SystemVerilog to Verilog (using sv2v tool)
 sv2v-srcs: $(SVERILOG_SRC)
+	@mkdir -p $(SV2V_RTL_DIR)
 	@for src in $^; do $(MAKE) sv2v-convert SV2V_SOURCE=$${src}; done
 
 #H# sv2v-convert        : Convert SystemVerilog module to Verilog
