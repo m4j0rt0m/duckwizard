@@ -15,6 +15,7 @@ DUCKWIZARD_DIR          = $(TOP_DIR)/.duckwizard
 
 ### directories ###
 SOURCE_DIR              = $(TOP_DIR)/src
+SV2V_RTL_DIR            = $(TOP_DIR)/.sv2v
 SYNTHESIS_DIR           = $(TOP_DIR)/synthesis
 SIMULATION_DIR          = $(TOP_DIR)/simulation
 FPGA_TEST_DIR           = $(TOP_DIR)/fpga
@@ -42,11 +43,20 @@ RTL_PATHS               = $(EXT_LIB_RTL_PATHS) $(RTL_DIRS) $(INCLUDE_DIRS) $(PAC
 TOP_MODULE_FILE         = $(shell basename $(shell grep -i -w -r "module $(TOP_MODULE)" $(RTL_PATHS) | cut -d ":" -f 1))
 
 ### sources wildcards ###
-VERILOG_SRC             = $(wildcard $(shell find $(RTL_DIRS) -type f \( -iname \*.v -o -iname \*.sv -o -iname \*.vhdl \)))
-VERILOG_HEADERS         = $(wildcard $(shell find $(INCLUDE_DIRS) -type f \( -iname \*.h -o -iname \*.vh -o -iname \*.svh -o -iname \*.sv -o -iname \*.v \)))
+ifeq ("$(SV2V_RERUN)","yes")
+VERILOG_SRC             = $(wildcard $(shell find $(RTL_DIRS) -type f \( -iname \*.v -o -iname \*.vhdl \))) $(wildcard $(SV2V_RTL_DIR)/*.v)
+SVERILOG_SRC            =
+SVERILOG_HEADERS        =
+PACKAGE_SRC             =
+else
+VERILOG_SRC             = $(wildcard $(shell find $(RTL_DIRS) -type f \( -iname \*.v -o -iname \*.vhdl \)))
+SVERILOG_SRC            = $(wildcard $(shell find $(RTL_DIRS) -type f \( -iname \*.sv \)))
+SVERILOG_HEADERS        = $(wildcard $(shell find $(INCLUDE_DIRS) -type f \( -iname \*.svh -o -iname \*.sv \)))
 PACKAGE_SRC             = $(shell $(SCRIPTS_DIR)/order_sv_pkg $(wildcard $(shell find $(PACKAGE_DIRS) -type f \( -iname \*.sv \))))
+endif
+VERILOG_HEADERS         = $(wildcard $(shell find $(INCLUDE_DIRS) -type f \( -iname \*.h -o -iname \*.vh -o -iname \*.v \)))
 MEM_SRC                 = $(wildcard $(shell find $(MEM_DIRS) -type f \( -iname \*.bin -o -iname \*.hex \)))
-RTL_SRC                 = $(VERILOG_SRC) $(VERILOG_HEADERS) $(PACKAGE_SRC) $(MEM_SRC)
+RTL_SRC                 = $(VERILOG_SRC) $(SVERILOG_SRC) $(VERILOG_HEADERS) $(SVERILOG_HEADERS) $(PACKAGE_SRC) $(MEM_SRC)
 
 ### makefile includes ###
 include $(SCRIPTS_DIR)/config.mk
@@ -83,11 +93,18 @@ LINTER_REMOTE_OPTION    =
 endif
 ifeq ($(RTL_LINTER),spyglass)
 LINT                    = $(SPYGLASS_LINT)
-LINT_FLAGS              = --top $(TOP_MODULE) --files $(subst $(TOP_DIR)/,,$(VERILOG_SRC)) --includes $(subst $(TOP_DIR)/,,$(RTL_PATHS)) --sv --license $(RTL_LINTER_LICENSE) $(LINTER_REMOTE_OPTION) $(LINTER_ENV_OPTION) $(SPYGLASS_WAIVER_OPTION) --move --debug
+LINT_FLAGS              = --top $(TOP_MODULE) --files $(subst $(TOP_DIR)/,,$(VERILOG_SRC)) $(subst $(TOP_DIR)/,,$(SVERILOG_SRC)) --includes $(subst $(TOP_DIR)/,,$(RTL_PATHS)) --sv --license $(RTL_LINTER_LICENSE) $(LINTER_REMOTE_OPTION) $(LINTER_ENV_OPTION) $(SPYGLASS_WAIVER_OPTION) --move --debug
 else
 LINT                    = $(VERILATOR_LINT)
 LINT_FLAGS              = --lint-only $(VERILATOR_LINT_SV_FLAGS) $(VERILATOR_LINT_W_FLAGS) --quiet-exit --error-limit 200 $(VERILATOR_CONFIG_FILE) $(INCLUDES_FLAGS) $(PACKAGE_SRC) $(TOP_MODULE_FILE)
 endif
+
+### sv2v flags ###
+SV2V_SOURCE :=
+SV2V_SV     := $(notdir $(SV2V_SOURCE))
+SV2V_V      := $(patsubst %.sv,%.v,$(SV2V_SV))
+SV2V_DEST   := "$(SV2V_RTL_DIR)/$(SV2V_V)"
+SV2V_FLAGS  := $(INCLUDES_FLAGS) $(PACKAGE_SRC)
 
 #H# all                 : Run linter, FPGA synthesis and simulation
 all: lint rtl-synth rtl-sim fpga-test
@@ -96,6 +113,7 @@ all: lint rtl-synth rtl-sim fpga-test
 veritedium:
 	@echo -e "$(_flag_)Running Veritedium Autocomplete..."
 	@$(foreach SRC,$(VERILOG_SRC),$(call veritedium-command,$(SRC)))
+	@$(foreach SRC,$(SVERILOG_SRC),$(call veritedium-command,$(SRC)))
 	@echo -e "$(_flag_)Deleting unnecessary backup files (*~ or *.bak)..."
 	find ./* -name "*~" -delete
 	find ./* -name "*.bak" -delete
@@ -121,7 +139,13 @@ lint-module:
 	$(LINT) $(LINT_FLAGS);\
 
 #H# rtl-synth           : Run RTL synthesis
+ifeq ($(USE_SV2V),yes)
+rtl-synth: sv2v-srcs
+	$(MAKE) SV2V_RERUN=yes rtl-synth-run
+rtl-synth-run:
+else
 rtl-synth:
+endif
 	@echo -e "$(_info_)\n[INFO] RTL Synthesis$(_reset_)";\
 	if [[ "$(RTL_SYN_TOOLS)" == "" ]]; then\
 		echo -e "$(_error_)[ERROR] No defined RTL synthesis tool! Define \"RTL_SYN_TOOLS\" environment variable or define it in the \"project.config\" file."$(_reset_);\
@@ -142,13 +166,13 @@ rtl-synth:
 					echo -e "$(_flag_)\n [*] Synthesis Top Module : $${tmodule}\n$(_reset_)";\
 					$(MAKE) -C $(SYNTHESIS_DIR)/$${stool} rtl-synth\
 						TOP_MODULE=$${tmodule}\
-						VERILOG_SRC="$(VERILOG_SRC)"\
-						VERILOG_HEADERS="$(VERILOG_HEADERS)"\
+						VERILOG_SRC="$(VERILOG_SRC) $(SVERILOG_SRC)"\
+						VERILOG_HEADERS="$(VERILOG_HEADERS) $(SVERILOG_HEADERS)"\
 						PACKAGE_SRC="$(PACKAGE_SRC)"\
 						MEM_SRC="$(MEM_SRC)"\
 						RTL_PATHS="$(RTL_PATHS)";\
-			  done;\
-		  fi;\
+				done;\
+			fi;\
 		done;\
 	fi
 
@@ -178,7 +202,9 @@ rtl-sim:
 						SIM_CREATE_VCD=$(SIM_CREATE_VCD)\
 						SIM_OPEN_WAVE=$(SIM_OPEN_WAVE)\
 						EXT_VERILOG_SRC="$(VERILOG_SRC)"\
+						EXT_SVERILOG_SRC="$(SVERILOG_SRC)"\
 						EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
+						EXT_SVERILOG_HEADERS="$(SVERILOG_HEADERS)"\
 						EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
 						EXT_MEM_SRC="$(MEM_SRC)"\
 						EXT_RTL_PATHS="$(RTL_PATHS)";\
@@ -205,8 +231,8 @@ fpga-test:
 			echo -e "  |-> Device     : $${!fpga_device}";\
 			echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
 			$(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} $${ftest}-project\
-				EXT_VERILOG_SRC="$(VERILOG_SRC)"\
-				EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
+				EXT_VERILOG_SRC="$(VERILOG_SRC) $(SVERILOG_SRC)"\
+				EXT_VERILOG_HEADERS="$(VERILOG_HEADERS) $(SVERILOG_HEADERS)"\
 				EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
 				EXT_MEM_SRC="$(MEM_SRC)"\
 				EXT_RTL_PATHS="$(RTL_PATHS)";\
@@ -236,8 +262,8 @@ fpga-rtl-sim:
 					SIM_TOOL="$${stool}"\
 					SIM_CREATE_VCD=$(FPGA_SIM_CREATE_VCD)\
 					SIM_OPEN_WAVE=$(FPGA_SIM_OPEN_WAVE)\
-					EXT_VERILOG_SRC="$(VERILOG_SRC)"\
-					EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
+					EXT_VERILOG_SRC="$(VERILOG_SRC) $(SVERILOG_SRC)"\
+					EXT_VERILOG_HEADERS="$(VERILOG_HEADERS) $(SVERILOG_HEADERS)"\
 					EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
 					EXT_MEM_SRC="$(MEM_SRC)"\
 					EXT_RTL_PATHS="$(RTL_PATHS)";\
@@ -262,8 +288,8 @@ fpga-flash:
 			echo -e "  |-> Device     : $${!fpga_device}";\
 			echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
 			$(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} $${ftest}-flash-fpga\
-				EXT_VERILOG_SRC="$(VERILOG_SRC)"\
-				EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
+				EXT_VERILOG_SRC="$(VERILOG_SRC) $(SVERILOG_SRC)"\
+				EXT_VERILOG_HEADERS="$(VERILOG_HEADERS) $(SVERILOG_HEADERS)"\
 				EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
 				EXT_MEM_SRC="$(MEM_SRC)"\
 				EXT_RTL_PATHS="$(RTL_PATHS)";\
@@ -283,8 +309,8 @@ lint-fpga-test:
 			echo -e "$(_flag_)\n [*] Running linter for $${ftest^} FPGA test";\
 			echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
 			$(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} lint\
-				EXT_VERILOG_SRC="$(VERILOG_SRC)"\
-				EXT_VERILOG_HEADERS="$(VERILOG_HEADERS)"\
+				EXT_VERILOG_SRC="$(VERILOG_SRC) $(SVERILOG_SRC)"\
+				EXT_VERILOG_HEADERS="$(VERILOG_HEADERS) $(SVERILOG_HEADERS)"\
 				EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
 				EXT_MEM_SRC="$(MEM_SRC)"\
 				EXT_RTL_PATHS="$(RTL_PATHS)";\
@@ -338,6 +364,15 @@ env-dirs:
 		done;\
 	fi
 
+#H# sv2v-srcs           : Convert RTL sources from SystemVerilog to Verilog (using sv2v tool)
+sv2v-srcs: $(SVERILOG_SRC)
+	@mkdir -p $(SV2V_RTL_DIR)
+	@for src in $^; do $(MAKE) sv2v-convert SV2V_SOURCE=$${src}; done
+
+#H# sv2v-convert        : Convert SystemVerilog module to Verilog
+sv2v-convert: check-sv2v
+	sv2v --write=$(SV2V_DEST) $(SV2V_FLAGS) $(SV2V_SOURCE)
+
 #H# init-repo           : Initialize repository (submodules)
 init-repo:
 	@git submodule update --init --recursive
@@ -368,7 +403,7 @@ update-files:
 	cd .. && rm -rf .rtl-template
 
 #H# help                : Display help
-help: Makefile $(SCRIPTS_DIR)/misc.mk
+help: $(DUCKWIZARD_DIR)/Makefile $(SCRIPTS_DIR)/misc.mk
 	@echo -e "\nHelp!...(8)\n"
 	@sed -n 's/^#H#//p' $^
 	@echo ""
