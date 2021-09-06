@@ -379,12 +379,12 @@ rm-git-db: init-repo
 
 #H# update-files        : Update files from template to the project structure
 update-files:
-	git clone $(REMOTE-URL-HTTPS) .rtl-template && \
-	cd .rtl-template && \
+	git clone $(REMOTE-URL-HTTPS) .dw-temp-update && \
+	cd .dw-temp-update && \
 	git submodule update --init --recursive && \
-	$(SCRIPTS_DIR)/copy_files $(DUCKWIZARD_FILES) $(TOP_DIR) && \
-	$(SCRIPTS_DIR)/restore_config $(CONFIG_FILE) project.config && \
-	cd .. && rm -rf .rtl-template
+	.duckwizard/scripts/copy_files .duckwizard/scripts/duckWizard.list $(TOP_DIR) && \
+	.duckwizard/scripts/restore_config $(CONFIG_FILE) project.config && \
+	cd .. && rm -rf .dw-temp-update
 
 #H# help                : Display help
 help: $(DUCKWIZARD_DIR)/Makefile $(SCRIPTS_DIR)/misc.mk
