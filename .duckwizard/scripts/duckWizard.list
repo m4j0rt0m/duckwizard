@@ -8,6 +8,6 @@
 ./.duckwizard/scripts/order_sv_pkg
 ./.duckwizard/scripts/parse_config
 ./.duckwizard/scripts/pull-feature-repo-files
-./.duckwizard/scripts/restore-config
+./.duckwizard/scripts/restore_config
 ./.duckwizard/scripts/spyglass_lint
 ./.duckwizard/scripts/update-submodules
