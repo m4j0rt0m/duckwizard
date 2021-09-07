@@ -4,6 +4,7 @@
 ./.duckwizard/scripts/copy_files
 ./.duckwizard/scripts/duckWizard.list
 ./.duckwizard/scripts/funct.mk
+./.duckwizard/scripts/install-sv2v
 ./.duckwizard/scripts/misc.mk
 ./.duckwizard/scripts/order_sv_pkg
 ./.duckwizard/scripts/parse_config
