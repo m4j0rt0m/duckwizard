@@ -12,8 +12,13 @@ define print-srcs-command
 	do\
 		echo "  |-> $${vsrc}";\
 	done
-	@echo " [+] Verilog Headers Files: $(words $(VERILOG_HEADERS))";\
-	for vheader in $(VERILOG_HEADERS);\
+	@echo " [+] SystemVerilog Source Files: $(words $(SVERILOG_SRC))";\
+	for svsrc in $(SVERILOG_SRC);\
+	do\
+		echo "  |-> $${svsrc}";\
+	done
+	@echo " [+] Verilog Headers Files: $(words $(VERILOG_HEADERS) $(SVERILOG_HEADERS))";\
+	for vheader in $(VERILOG_HEADERS) $(SVERILOG_HEADERS);\
 	do\
 		echo "  |-> $${vheader}";\
 	done
