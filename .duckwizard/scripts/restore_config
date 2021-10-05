@@ -12,6 +12,7 @@ config_options=(
   'fpga_test'
   'fpga_sim_test'
   'fpga_sim_tool'
+  'use_sv2v'
   'rtl_linter_license'
   'rtl_linter_remote'
   'rtl_linter_remote_ip'
