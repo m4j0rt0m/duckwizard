@@ -70,7 +70,7 @@ INCLUDES_FLAGS          = $(addprefix -I, $(RTL_PATHS))
 VERILATOR_LINT          = verilator
 VERILATOR_LINT_SV_FLAGS = +1800-2017ext+sv -sv
 VERILATOR_LINT_W_FLAGS  = -Wall -Wno-IMPORTSTAR -Wno-fatal
-VERILATOR_CONFIG_FILE   = $(SCRIPT_DIR)/config.vlt
+VERILATOR_CONFIG_FILE   = $(SCRIPTS_DIR)/config.vlt
 ifeq ("$(wildcard $(VERILATOR_CONFIG_FILE))","")
 VERILATOR_CONFIG_FILE   =
 endif
