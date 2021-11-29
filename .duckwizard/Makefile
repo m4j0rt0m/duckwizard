@@ -182,7 +182,7 @@ rtl-sim:
 		stool_list=($(SIM_TOOL));\
 		for sidx in `seq 0 $$(($${#stool_list[@]}-1))`; do\
 			stool=$${stool_list[$$sidx]};\
-			$(MAKE) check-dir-env RTL_ENV_FEATURE=simulation;\
+			$(MAKE) check-dir-env RTL_ENV_FEATURE=simulation RTL_ENV_SUBFEATURE=$${stool};\
 			if [[ "$(SIM_MODULES)" == "" ]]; then\
 				echo -e "$(_error_)[ERROR] No defined simulation top module!$(_reset_)";\
 			else\
