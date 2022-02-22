@@ -1,0 +1,205 @@
+#!/bin/bash
+
+#########################################################################
+#                                                                       #
+# Script Name   : order_sv_pkg                                          #
+# Description   : SystemVerilog packages list-ordering script, prints   #
+#                 out the packages in dependency order.                 #
+# Author(s)     : Abraham J. Ruiz R. [www.github.com/m4j0rt0m]          #
+#                   abraham.j.ruiz.r@gmail.com                          #
+# Version       : v1.0 - 23/05/2021                                     #
+# Notes         : - More than one package per file unsupported.         #
+#                 - Input files should be only package files.           #
+#                 - File should have the package's name: <package>.sv   #
+# Future Work   : - Support more packages per file                      #
+#                 - Package can have a different name than the filename #
+#                                                                       #
+#########################################################################
+
+file_pkg=("$@")
+declare -a name_pkg
+declare -a deps_pkg
+declare -a idx_pkg
+declare -a size_list_pkg
+declare -a flag_set
+declare -a flag_req
+declare -a flag_dep
+declare -a sv_pkg
+declare -a sv_file_pkg
+
+show_info="no"
+verbose="no"
+
+### get filename ###
+function get_filename () {
+  filename=$(basename -- "$1")
+  extension="${filename##*.}"
+  filename="${filename%.*}"
+  echo $filename
+}
+
+### extract package dependencies ###
+function extract_pkg_deps () {
+  ext_deps=$(grep -x '[[:blank:]]*import .*::.*;$' $1 | awk -F\import '{ print $2 }' | awk -F\:: '{ print $1 }')
+  echo $ext_deps
+}
+
+### get filenames list ###
+function get_filenames_list {
+  #printf '\n ----------------------------------------------------\n'
+  #printf ' [ * ] Get filenames'
+  i=0
+  for fpkg in ${file_pkg[@]}; do
+    name_pkg[$i]=$(get_filename $fpkg)
+    flag_set[$i]=false
+    (( i++ ))
+  done
+  if [[ "${verbose}" == "yes" ]]; then
+    printf '\n ----------------------------------------------------\n'
+    printf '  %s\n' "${name_pkg[@]}"
+  fi
+  #printf ' ... OK\n'
+}
+
+### create package dependencies list ###
+function create_pkg_dep_list {
+  #printf ' ----------------------------------------------------\n'
+  #printf ' [ * ] Get package dependencies'
+  i=0
+  for fpkg in ${file_pkg[@]}; do
+    j=0
+    deps_pkg[$i]=$(extract_pkg_deps $fpkg ${name_pkg[@]})
+    if [[ "${deps_pkg[$i]}" == "" ]]; then
+      flag_dep[$i]=0
+      if [[ "${verbose}" == "yes" ]]; then
+        if [[ $i == 0 ]]; then printf '\n'; fi
+        printf ' ----------------------------------------------------\n'
+        printf '  %s [ false ]\n' "${fpkg}"
+      fi
+    else
+      for dep in ${deps_pkg[$i]}; do (( j++ )); done
+      flag_dep[$i]=$j
+      if [[ "${verbose}" == "yes" ]]; then
+        if [[ $i == 0 ]]; then printf '\n'; fi
+        printf ' ----------------------------------------------------\n'
+        printf '  %s [ true ]:\n' "${fpkg}"
+        for pdep in ${deps_pkg[$i]}; do
+          printf '    [ %s ]\n' "${pdep}"
+        done
+      fi
+    fi
+    (( i++ ))
+  done
+  #printf ' ... OK\n'
+}
+
+### check if all the required packages are in the input list
+function check_pkg_list {
+  #printf ' ----------------------------------------------------\n'
+  #printf ' [ * ] Check if all dependencies are in list'
+  for dpkg in ${deps_pkg[@]}; do
+    found_pkg=false
+    for npkg in ${name_pkg[@]}; do
+      if [[ $dpkg == $npkg ]]; then
+        found_pkg=true
+      fi
+    done
+    if [[ $found_pkg != true ]]; then
+      printf ' ... [ Error ]: Package %s is not found' "${dpkg}"
+      exit 1
+    fi
+  done
+  #printf ' ... OK\n'
+}
+
+### insert packages without dependencies ###
+function set_no_dep_pkg {
+  #printf ' ----------------------------------------------------\n'
+  #printf ' [ * ] Append packages with no dependencies'
+  i=0
+  for idx in ${!name_pkg[@]}; do
+    if [ ${flag_dep[$idx]} -eq 0 ]; then
+      flag_set[$idx]=true
+      sv_pkg[$i]=${name_pkg[$idx]}
+      sv_file_pkg[$i]=${file_pkg[$idx]}
+      if [[ "${verbose}" == "yes" ]]; then
+        if [[ $i == 0 ]]; then printf '\n'; fi
+        printf '    [ %s ]\n' "${name_pkg[$idx]}"
+      fi
+      (( i++ ))
+    fi
+  done
+  #printf ' ... OK\n'
+}
+
+### search package in list ###
+function search_pkg () {
+  req_pkg=$1
+  shift
+  pkg_list=$@
+  ret_val=1
+  for pkg in ${pkg_list}; do
+    if [[ "${req_pkg}" == "${pkg}" ]]; then ret_val=0; fi
+  done
+  printf '%d' "${ret_val}"
+}
+
+### insert remaining dependencies ###
+function set_dep_pkg {
+  #printf ' ----------------------------------------------------\n'
+  #printf ' [ * ] Append packages with dependencies'
+  i=0
+  pkg_error=false
+  while [[ $pkg_error == false ]] & [[ ! ${#name_pkg[@]} -eq ${#sv_pkg[@]} ]]; do
+    pkg_error=true
+    for idx in ${!name_pkg[@]}; do
+      if [[ ${flag_dep[$idx]} -gt 0 ]] & [[ ${flag_set[$idx]} == false ]]; then
+        deps=${deps_pkg[$idx]}
+        dep_num=${flag_dep[$idx]}
+        accum=0
+        for dep in ${deps}; do
+          found_pkg=$(search_pkg "${dep}" "${sv_pkg[@]}")
+          if [[ $found_pkg -eq 0 ]]; then
+            (( accum++ ))
+          fi
+        done
+        if [ ${accum} == ${dep_num} ]; then
+          pkg_error=false
+          sv_pkg+=("${name_pkg[$idx]}")
+          sv_file_pkg+=("${file_pkg[$idx]}")
+          flag_set[$idx]=true
+        fi
+      fi
+    done
+  done
+}
+
+### show packages information ###
+function show_pkg_info {
+  printf '\n ----------------------------------------------------\n'
+  printf ' [ * ] Print packages information\n'
+  for idx in ${!file_pkg[@]}; do
+    printf ' ----------------------------------------------------\n'
+    printf '  File         : %s\n' "${file_pkg[$idx]}"
+    printf '  Package      : %s\n' "${name_pkg[$idx]}"
+    printf '  Dependencies : [ %d ] %s\n' "${flag_dep[$idx]}" "${deps_pkg[$idx]}"
+  done
+  printf ' ----------------------------------------------------\n'
+  printf '  Ordered packages names:\n'
+  printf '   [*] %s\n' "${sv_pkg[@]}"
+  printf ' ----------------------------------------------------\n'
+  printf '  Ordered packages files:\n'
+  printf '   [*] %s\n' "${sv_file_pkg[@]}"
+}
+
+function main {
+  get_filenames_list
+  create_pkg_dep_list
+  check_pkg_list
+  set_no_dep_pkg
+  set_dep_pkg
+  if [[ "${show_info}" == "yes" ]]; then show_pkg_info; fi
+  echo "${sv_file_pkg[@]}"
+}
+
+main
