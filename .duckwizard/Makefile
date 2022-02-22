@@ -1,6 +1,6 @@
 # Author:      Abraham J. Ruiz R.
 # Description: Main project Makefile for linting, synthesis, simulation ant testing features
-# Version:     1.2
+# Version:     1.3
 # Url:         https://github.com/m4j0rt0m/duckwizard
 
 ### header flags ###
@@ -15,30 +15,34 @@ DUCKWIZARD_DIR          = $(TOP_DIR)/.duckwizard
 
 ### directories ###
 SOURCE_DIR              = $(TOP_DIR)/src
-SV2V_RTL_DIR            = $(TOP_DIR)/.sv2v
-SYNTHESIS_DIR           = $(TOP_DIR)/synthesis
-SIMULATION_DIR          = $(TOP_DIR)/simulation
+TB_SOURCE_DIR           = $(TOP_DIR)/tb
 FPGA_TEST_DIR           = $(TOP_DIR)/fpga
+BUILD_DIR               = $(TOP_DIR)/build
 SCRIPTS_DIR             = $(DUCKWIZARD_DIR)/scripts
 DESIGN_RTL_DIR          = $(TOP_DIR)
 FILELIST                = $(TOP_DIR)/filelist.f
 DUCKWIZARD_FILES        = $(SCRIPTS_DIR)/duckWizard.list
 
+## duckwizard environment directories ##
+SIMULATION_ENV_DIR      = $(DUCKWIZARD_DIR)/simulation
+SYNTHESIS_ENV_DIR       = $(DUCKWIZARD_DIR)/synthesis
+SV2V_RTL_DIR            = $(BUILD_DIR)/.sv2v
+
 ### external library source directory ###
 EXT_LIB_SOURCE_DIR     ?=
 ifneq ($(EXT_LIB_SOURCE_DIR),)
-EXT_LIB_RTL_DIRS        = $(wildcard $(shell find $(abspath $(EXT_LIB_SOURCE_DIR)) -type d -iname rtl ! -path "*fpga*" ! -path "*simulation*"))
-EXT_LIB_INCLUDE_DIRS    = $(wildcard $(shell find $(abspath $(EXT_LIB_SOURCE_DIR)) -type d -iname include ! -path "*fpga*" ! -path "*simulation*"))
-EXT_LIB_PACKAGE_DIRS    = $(wildcard $(shell find $(abspath $(EXT_LIB_SOURCE_DIR)) -type d -iname package ! -path "*fpga*" ! -path "*simulation*"))
-EXT_LIB_MEM_DIRS        = $(wildcard $(shell find $(abspath $(EXT_LIB_SOURCE_DIR)) -type d -iname mem ! -path "*fpga*" ! -path "*simulation*"))
+EXT_LIB_RTL_DIRS        = $(wildcard $(shell find $(abspath $(EXT_LIB_SOURCE_DIR)) -type d -iname rtl ! -path "*fpga/*" ! -path "*tb/*"))
+EXT_LIB_INCLUDE_DIRS    = $(wildcard $(shell find $(abspath $(EXT_LIB_SOURCE_DIR)) -type d -iname include ! -path "*fpga/*" ! -path "*tb/*"))
+EXT_LIB_PACKAGE_DIRS    = $(wildcard $(shell find $(abspath $(EXT_LIB_SOURCE_DIR)) -type d -iname package ! -path "*fpga/*" ! -path "*tb/*"))
+EXT_LIB_MEM_DIRS        = $(wildcard $(shell find $(abspath $(EXT_LIB_SOURCE_DIR)) -type d -iname mem ! -path "*fpga/*" ! -path "*tb/*"))
 EXT_LIB_RTL_PATHS       = $(EXT_LIB_RTL_DIRS) $(EXT_LIB_INCLUDE_DIRS) $(EXT_LIB_PACKAGE_DIRS) $(EXT_LIB_MEM_DIRS)
 endif
 
 ### sources directories ###
-RTL_DIRS                = $(EXT_LIB_RTL_DIRS) $(wildcard $(shell find $(SOURCE_DIR) -type d -iname rtl ! -path "*fpga*" ! -path "*simulation*"))
-INCLUDE_DIRS            = $(EXT_LIB_INCLUDE_DIRS) $(wildcard $(shell find $(SOURCE_DIR) -type d -iname include ! -path "*fpga*" ! -path "*simulation*"))
-PACKAGE_DIRS            = $(EXT_LIB_PACKAGE_DIRS) $(wildcard $(shell find $(SOURCE_DIR) -type d -iname package ! -path "*fpga*" ! -path "*simulation*"))
-MEM_DIRS                = $(EXT_LIB_MEM_DIRS) $(wildcard $(shell find $(SOURCE_DIR) -type d -iname mem ! -path "*fpga*" ! -path "*simulation*"))
+RTL_DIRS                = $(EXT_LIB_RTL_DIRS) $(wildcard $(shell find $(SOURCE_DIR) -type d -iname rtl ! -path "*fpga/*" ! -path "*tb/*"))
+INCLUDE_DIRS            = $(EXT_LIB_INCLUDE_DIRS) $(wildcard $(shell find $(SOURCE_DIR) -type d -iname include ! -path "*fpga/*" ! -path "*tb/*"))
+PACKAGE_DIRS            = $(EXT_LIB_PACKAGE_DIRS) $(wildcard $(shell find $(SOURCE_DIR) -type d -iname package ! -path "*fpga/*" ! -path "*tb/*"))
+MEM_DIRS                = $(EXT_LIB_MEM_DIRS) $(wildcard $(shell find $(SOURCE_DIR) -type d -iname mem ! -path "*fpga/*" ! -path "*tb/*"))
 RTL_PATHS               = $(EXT_LIB_RTL_PATHS) $(RTL_DIRS) $(INCLUDE_DIRS) $(PACKAGE_DIRS) $(MEM_DIRS)
 TOP_MODULE_FILE         = $(shell basename $(shell grep -i -w -r "module $(TOP_MODULE)" $(RTL_PATHS) | cut -d ":" -f 1))
 
@@ -152,7 +156,6 @@ endif
 		stool_list=($(RTL_SYN_TOOLS));\
 		for sidx in `seq 0 $$(($${#stool_list[@]}-1))`; do\
 			stool=$${stool_list[$$sidx]};\
-			$(MAKE) check-dir-env RTL_ENV_FEATURE=synthesis RTL_ENV_SUBFEATURE=$${stool};\
 			if [[ "$(TOP_MODULE)" == "" ]]; then\
 				echo -e "$(_error_)[ERROR] No defined top module!$(_reset_)";\
 			else\
@@ -161,8 +164,9 @@ endif
 				for tidx in `seq 0 $$(($${#tmodule_list[@]}-1))`; do\
 					tmodule=$${tmodule_list[$$tidx]};\
 					echo -e "$(_flag_)\n [*] Synthesis Top Module : $${tmodule}\n$(_reset_)";\
-					$(MAKE) -C $(SYNTHESIS_DIR)/$${stool} rtl-synth\
+					$(MAKE) -C $(SYNTHESIS_ENV_DIR)/$${stool} rtl-synth\
 						TOP_MODULE=$${tmodule}\
+						SYN_BUILD_DIR="$(BUILD_DIR)/syn/$${stool}"\
 						VERILOG_SRC="$(VERILOG_SRC) $(SVERILOG_SRC)"\
 						VERILOG_HEADERS="$(VERILOG_HEADERS) $(SVERILOG_HEADERS)"\
 						PACKAGE_SRC="$(PACKAGE_SRC)"\
@@ -182,7 +186,6 @@ rtl-sim:
 		stool_list=($(SIM_TOOL));\
 		for sidx in `seq 0 $$(($${#stool_list[@]}-1))`; do\
 			stool=$${stool_list[$$sidx]};\
-			$(MAKE) check-dir-env RTL_ENV_FEATURE=simulation RTL_ENV_SUBFEATURE=$${stool};\
 			if [[ "$(SIM_MODULES)" == "" ]]; then\
 				echo -e "$(_error_)[ERROR] No defined simulation top module!$(_reset_)";\
 			else\
@@ -191,9 +194,11 @@ rtl-sim:
 				for sidx in `seq 0 $$(($${#smodule_list[@]}-1))`; do\
 					smodule=$${smodule_list[$$sidx]};\
 					echo -e "$(_flag_)\n [*] Simulating Top Module : $${smodule}\n$(_reset_)";\
-					$(MAKE) -C $(SIMULATION_DIR)/$${stool} sim\
+					$(MAKE) -C $(SIMULATION_ENV_DIR)/$${stool} sim\
 						SIM_TOP_MODULE=$${smodule}\
 						SIM_TOOL=$${stool}\
+						SIM_SOURCE_DIR="$(TB_SOURCE_DIR)"\
+						SIM_BUILD_DIR="$(BUILD_DIR)/sim/$${stool}"\
 						SIM_CREATE_VCD=$(SIM_CREATE_VCD)\
 						SIM_OPEN_WAVE=$(SIM_OPEN_WAVE)\
 						EXT_VERILOG_SRC="$(VERILOG_SRC)"\
@@ -316,12 +321,12 @@ clean-all: clean
 	@syn_tool_list=($(SUPPORTED_SYNTHESIS));\
 	for sidx in `seq 0 $$(($${#syn_tool_list[@]}-1))`; do\
 		stool=$${syn_tool_list[$$sidx]};\
-		if [ -d $(SYNTHESIS_DIR)/$${stool} ]; then $(MAKE) -C $(SYNTHESIS_DIR)/$${stool} clean; fi;\
+		if [ -d $(SYNTHESIS_ENV_DIR)/$${stool} ]; then $(MAKE) -C $(SYNTHESIS_ENV_DIR)/$${stool} clean; fi;\
 	done
 	@sim_tool_list=($(SUPPORTED_SIMULATION));\
 	for sidx in `seq 0 $$(($${#sim_tool_list[@]}-1))`; do\
 		stool=$${sim_tool_list[$$sidx]};\
-		if [ -d $(SIMULATION_DIR)/$${stool} ]; then $(MAKE) -C $(SIMULATION_DIR)/$${stool} clean; fi;\
+		if [ -d $(SIMULATION_ENV_DIR)/$${stool} ]; then $(MAKE) -C $(SIMULATION_ENV_DIR)/$${stool} clean; fi;\
 	done
 	@fpga_test_list=($(SUPPORTED_FPGA_TEST));\
 	for fidx in `seq 0 $$(($${#fpga_test_list[@]}-1))`; do\
@@ -332,16 +337,6 @@ clean-all: clean
 
 #H# env-dirs            : Create features environment directories (synthesis, fpga-test, simulation, etc.)
 env-dirs:
-	@if [[ "$(RTL_SYN_TOOLS)" != "" ]]; then\
-		for stool in $(RTL_SYN_TOOLS); do\
-			$(MAKE) check-dir-env RTL_ENV_FEATURE=synthesis RTL_ENV_SUBFEATURE=$${stool};\
-		done;\
-	fi
-	@if [[ "$(SIM_TOOL)" != "" ]]; then\
-		for stool in $(SIM_TOOL); do\
-			$(MAKE) check-dir-env RTL_ENV_FEATURE=simulation RTL_ENV_SUBFEATURE=$${stool};\
-		done;\
-	fi
 	@if [[ "$(FPGA_TEST)" != "" ]]; then\
 		for ftest in $(FPGA_TEST); do\
 			$(MAKE) check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
@@ -350,6 +345,7 @@ env-dirs:
 
 #H# sv2v-srcs           : Convert RTL sources from SystemVerilog to Verilog (using sv2v tool)
 sv2v-srcs: $(SVERILOG_SRC)
+	@rm -rvf .sv2v/*
 	@mkdir -p $(SV2V_RTL_DIR)
 	@for src in $^; do $(MAKE) sv2v-convert SV2V_SOURCE=$${src}; done
 
@@ -394,10 +390,20 @@ help: $(DUCKWIZARD_DIR)/Makefile $(SCRIPTS_DIR)/misc.mk
 
 #H# help-all            : Display complete rules help
 help-all: help
-	@$(MAKE) -C $(SYNTHESIS_DIR)/quartus help
-	@$(MAKE) -C $(SYNTHESIS_DIR)/yosys help
-	@$(MAKE) -C $(FPGA_TEST_DIR)/altera help
-	@$(MAKE) -C $(FPGA_TEST_DIR)/lattice help
-	@$(MAKE) -C $(SIMULATION_DIR) help
+	@syn_tool_list=($(SUPPORTED_SYNTHESIS));\
+	for sidx in `seq 0 $$(($${#syn_tool_list[@]}-1))`; do\
+		stool=$${syn_tool_list[$$sidx]};\
+		if [ -d $(SYNTHESIS_ENV_DIR)/$${stool} ]; then $(MAKE) -C $(SYNTHESIS_ENV_DIR)/$${stool} help; fi;\
+	done
+	@sim_tool_list=($(SUPPORTED_SIMULATION));\
+	for sidx in `seq 0 $$(($${#sim_tool_list[@]}-1))`; do\
+		stool=$${sim_tool_list[$$sidx]};\
+		if [ -d $(SIMULATION_ENV_DIR)/$${stool} ]; then $(MAKE) -C $(SIMULATION_ENV_DIR)/$${stool} help; fi;\
+	done
+	@fpga_test_list=($(SUPPORTED_FPGA_TEST));\
+	for fidx in `seq 0 $$(($${#fpga_test_list[@]}-1))`; do\
+		ftest=$${fpga_test_list[$$fidx]};\
+		if [ -d $(FPGA_TEST_DIR)/$${ftest} ]; then $(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} help; fi;\
+	done
 
 .PHONY: all lint lint-module rtl-synth rtl-sim fpga-test fpga-flash print-rtl-srcs print-config filelist env-dirs check-config veritedium clean clean-all del-bak help help-all
