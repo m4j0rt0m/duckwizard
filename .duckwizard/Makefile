@@ -315,6 +315,8 @@ lint-fpga-test:
 #H# clean               : Clean the build directory
 clean: del-bak
 	rm -rf build/*
+	rm -rf transcript
+	rm -rf vsim.wlf
 
 #H# clean-all           : Clean all the build directories
 clean-all: clean
