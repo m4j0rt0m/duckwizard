@@ -34,6 +34,7 @@ As this is a work-in-progress project, more useful stuff will be added time to t
   - Yosys
 - Simulation
   - Icarus Verilog
+  - QuestaSim
 - FPGA test
   - Altera
   - Lattice
