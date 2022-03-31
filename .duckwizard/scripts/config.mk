@@ -35,6 +35,12 @@ RTL_SYN_Y_PNR_TOOL        ?= $(shell $(PARSE_CONFIG) rtl_synth_yosys_pnr_tool)
 SIM_MODULES               ?= $(shell $(PARSE_CONFIG) sim_modules)
 SIM_CREATE_VCD            ?= $(shell $(PARSE_CONFIG) sim_create_vcd)
 SIM_OPEN_WAVE             ?= $(shell $(PARSE_CONFIG) sim_open_wave)
+# - sim-questasim
+SIM_QUESTA_MODE           ?= $(shell $(PARSE_CONFIG) sim_questa_mode)
+SIM_QUESTA_WAVE_DO        ?= $(shell $(PARSE_CONFIG) sim_questa_wave_do)
+SIM_QUESTA_CYCLES         ?= $(shell $(PARSE_CONFIG) sim_questa_cycles)
+SIM_QUESTA_VLOG_EXTRA     ?= $(shell $(PARSE_CONFIG) sim_questa_vlog_extra_flags)
+SIM_QUESTA_VSIM_EXTRA     ?= $(shell $(PARSE_CONFIG) sim_questa_vsim_extra_flags)
 # - fpga-test
 FPGA_TOP_MODULE           ?= $(shell $(PARSE_CONFIG) fpga_top)
 FPGA_VIRTUAL_PINS         ?= $(shell $(PARSE_CONFIG) fpga_virtual_pins)
@@ -81,6 +87,11 @@ export RTL_SYN_Y_TARGET
 export RTL_SYN_Y_DEVICE
 export RTL_SYN_Y_CLK_MHZ
 export RTL_SYN_Y_PNR_TOOL
+export SIM_QUESTA_MODE
+export SIM_QUESTA_WAVE_DO
+export SIM_QUESTA_CYCLES
+export SIM_QUESTA_VLOG_EXTRA
+export SIM_QUESTA_VSIM_EXTRA
 export FPGA_TOP_MODULE
 export FPGA_VIRTUAL_PINS
 export FPGA_BOARD_TEST
@@ -107,4 +118,4 @@ check-config:
 ### supported stuff flags ###
 SUPPORTED_SYNTHESIS  = quartus yosys
 SUPPORTED_FPGA_TEST  = altera lattice
-SUPPORTED_SIMULATION = iverilog
+SUPPORTED_SIMULATION = iverilog questasim

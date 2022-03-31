@@ -48,7 +48,7 @@ define print-filelist
 		{ echo '$${DESIGN_RTL_DIR}/'; echo "$${psrc}" | grep -oP "^$(2)/\K.*";} | tr -d "\n" >> $(1);\
 		echo "" >> $(1);\
 	done;\
-	for vsrc in $(VERILOG_SRC) $(SVERILOG_SRC);\
+	for vsrc in $(VERILOG_SRC);\
 	do\
 		{ echo '$${DESIGN_RTL_DIR}/'; echo "$${vsrc}" | grep -oP "^$(2)/\K.*";} | tr -d "\n" >> $(1);\
 		echo "" >> $(1);\
