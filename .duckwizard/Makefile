@@ -47,14 +47,15 @@ RTL_PATHS               = $(EXT_LIB_RTL_PATHS) $(RTL_DIRS) $(INCLUDE_DIRS) $(PAC
 TOP_MODULE_FILE         = $(shell basename $(shell grep -i -w -r "module $(TOP_MODULE)" $(RTL_PATHS) | cut -d ":" -f 1))
 
 ### sources wildcards ###
+EXCLUDE_FLAGS           = $(addprefix ! -path "*/, $(addsuffix ",$(SKIP_MODULES)))
 ifeq ("$(SV2V_RERUN)","yes")
-VERILOG_SRC             = $(wildcard $(shell find $(RTL_DIRS) -type f \( -iname \*.v -o -iname \*.vhdl \))) $(wildcard $(SV2V_RTL_DIR)/*.v)
+VERILOG_SRC             = $(wildcard $(shell find $(RTL_DIRS) -type f \( -iname \*.v -o -iname \*.vhdl \) $(EXCLUDE_FLAGS) )) $(wildcard $(SV2V_RTL_DIR)/*.v)
 SVERILOG_SRC            =
 SVERILOG_HEADERS        =
 PACKAGE_SRC             =
 else
 VERILOG_SRC             = $(wildcard $(shell find $(RTL_DIRS) -type f \( -iname \*.v -o -iname \*.vhdl \)))
-SVERILOG_SRC            = $(wildcard $(shell find $(RTL_DIRS) -type f \( -iname \*.sv \)))
+SVERILOG_SRC            = $(wildcard $(shell find $(RTL_DIRS) -type f \( -iname \*.sv \) $(EXCLUDE_FLAGS) ))
 SVERILOG_HEADERS        = $(wildcard $(shell find $(INCLUDE_DIRS) -type f \( -iname \*.svh -o -iname \*.sv \)))
 PACKAGE_SRC             = $(shell $(SCRIPTS_DIR)/order_sv_pkg $(wildcard $(shell find $(PACKAGE_DIRS) -type f \( -iname \*.sv \))))
 endif
