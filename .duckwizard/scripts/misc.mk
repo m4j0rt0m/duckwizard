@@ -109,6 +109,22 @@ check-sv2v:
 install-sv2v:
 	@$(SCRIPTS_DIR)/install-sv2v
 
+#H# update-commit-file  : Update commit hash file
+update-commit-file:
+	@echo $(COMMIT_HASH) > $(COMMIT_FILE)
+
+#H# update-version-file : Update version file
+update-version-file:
+	@echo $(VERSION) > $(VERSION_FILE)
+
+#H# dw-commit           : Display duckWizard's commit hash
+dw-commit:
+	@cat $(COMMIT_FILE)
+
+#H# dw-version          : Display duckWizard's version
+dw-version:
+	@cat $(VERSION_FILE)
+
 #H# del-bak             : Delete backup files
 del-bak:
 	find ./* -name "*~" -delete
