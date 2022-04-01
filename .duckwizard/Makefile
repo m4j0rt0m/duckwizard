@@ -55,7 +55,7 @@ SVERILOG_HEADERS        =
 PACKAGE_SRC             =
 else
 VERILOG_SRC             = $(wildcard $(shell find $(RTL_DIRS) -type f \( -iname \*.v -o -iname \*.vhdl \)))
-SVERILOG_SRC            = $(wildcard $(shell find $(RTL_DIRS) -type f \( -iname \*.sv \) $(EXCLUDE_FLAGS) ))
+SVERILOG_SRC            = $(wildcard $(shell find $(RTL_DIRS) -type f \( -iname \*.sv -o -iname \*.svp \) $(EXCLUDE_FLAGS) ))
 SVERILOG_HEADERS        = $(wildcard $(shell find $(INCLUDE_DIRS) -type f \( -iname \*.svh -o -iname \*.sv \)))
 PACKAGE_SRC             = $(shell $(SCRIPTS_DIR)/order_sv_pkg $(wildcard $(shell find $(PACKAGE_DIRS) -type f \( -iname \*.sv \))))
 endif
