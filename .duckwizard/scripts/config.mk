@@ -37,6 +37,8 @@ RTL_SYN_Y_PNR_TOOL        ?= $(shell $(PARSE_CONFIG) rtl_synth_yosys_pnr_tool)
 SIM_MODULES               ?= $(shell $(PARSE_CONFIG) sim_modules)
 SIM_CREATE_VCD            ?= $(shell $(PARSE_CONFIG) sim_create_vcd)
 SIM_OPEN_WAVE             ?= $(shell $(PARSE_CONFIG) sim_open_wave)
+# - skip sim modules
+SKIP_SIM_MODULES          ?= $(shell $(PARSE_CONFIG) skip_sim_modules)
 # - sim-questasim
 SIM_QUESTA_MODE           ?= $(shell $(PARSE_CONFIG) sim_questa_mode)
 SIM_QUESTA_WAVE_DO        ?= $(shell $(PARSE_CONFIG) sim_questa_wave_do)
@@ -90,6 +92,7 @@ export RTL_SYN_Y_TARGET
 export RTL_SYN_Y_DEVICE
 export RTL_SYN_Y_CLK_MHZ
 export RTL_SYN_Y_PNR_TOOL
+export SKIP_SIM_MODULES
 export SIM_QUESTA_MODE
 export SIM_QUESTA_WAVE_DO
 export SIM_QUESTA_CYCLES
