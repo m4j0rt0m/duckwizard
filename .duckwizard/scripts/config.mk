@@ -3,75 +3,79 @@ CONFIG_FILE                = $(TOP_DIR)/project.config
 PARSE_CONFIG               = $(SCRIPTS_DIR)/parse_config $(CONFIG_FILE)
 
 ### project configuration ###
-PROJECT                   ?= $(shell $(PARSE_CONFIG) project)
-TOP_MODULE                ?= $(shell $(PARSE_CONFIG) rtl_top)
+PROJECT                           ?= $(shell $(PARSE_CONFIG) project)
+TOP_MODULE                        ?= $(shell $(PARSE_CONFIG) rtl_top)
 # - project-features
-RTL_LINTER                ?= $(shell $(PARSE_CONFIG) rtl_linter)
-RTL_SYN_TOOLS             ?= $(shell $(PARSE_CONFIG) rtl_synth_tools)
-SIM_TOOL                  ?= $(shell $(PARSE_CONFIG) sim_tool)
-FPGA_TEST                 ?= $(shell $(PARSE_CONFIG) fpga_test)
-FPGA_SIM_TEST             ?= $(shell $(PARSE_CONFIG) fpga_sim_test)
-FPGA_SIM_TOOL             ?= $(shell $(PARSE_CONFIG) fpga_sim_tool)
+RTL_LINTER                        ?= $(shell $(PARSE_CONFIG) rtl_linter)
+RTL_SYN_TOOLS                     ?= $(shell $(PARSE_CONFIG) rtl_synth_tools)
+SIM_TOOL                          ?= $(shell $(PARSE_CONFIG) sim_tool)
+FPGA_TEST                         ?= $(shell $(PARSE_CONFIG) fpga_test)
+FPGA_SIM_TEST                     ?= $(shell $(PARSE_CONFIG) fpga_sim_test)
+FPGA_SIM_TOOL                     ?= $(shell $(PARSE_CONFIG) fpga_sim_tool)
 # - skip modules
-SKIP_MODULES              ?= $(shell $(PARSE_CONFIG) skip_modules)
+SKIP_MODULES                      ?= $(shell $(PARSE_CONFIG) skip_modules)
 # - sv2v usage
-USE_SV2V                  ?= $(shell $(PARSE_CONFIG) use_sv2v)
+USE_SV2V                          ?= $(shell $(PARSE_CONFIG) use_sv2v)
 # - rtl-lint
-RTL_LINTER_LICENSE        ?= $(shell $(PARSE_CONFIG) rtl_linter_license)
-RTL_LINTER_REMOTE         ?= $(shell $(PARSE_CONFIG) rtl_linter_remote)
-RTL_LINTER_REMOTE_IP      ?= $(shell $(PARSE_CONFIG) rtl_linter_remote_ip)
-RTL_LINTER_ENV_SOURCE     ?= $(shell $(PARSE_CONFIG) rtl_linter_env_source)
+RTL_LINTER_LICENSE                ?= $(shell $(PARSE_CONFIG) rtl_linter_license)
+RTL_LINTER_REMOTE                 ?= $(shell $(PARSE_CONFIG) rtl_linter_remote)
+RTL_LINTER_REMOTE_IP              ?= $(shell $(PARSE_CONFIG) rtl_linter_remote_ip)
+RTL_LINTER_ENV_SOURCE             ?= $(shell $(PARSE_CONFIG) rtl_linter_env_source)
+# - rtl-linter-verilator-flags
+RTL_LINTER_VERILATOR_WNO_FLAGS    ?= $(shell $(PARSE_CONFIG) rtl_linter_verilator_wno_flags)
+RTL_LINTER_VERILATOR_EXTRA_FLAGS  ?= $(shell $(PARSE_CONFIG) rtl_linter_verilator_extra_flags)
+RTL_LINTER_VERILATOR_DEFINES      ?= $(shell $(PARSE_CONFIG) rtl_linter_verilator_defines)
 # - rtl-synthesis
-RTL_SYN_USES_CLK          ?= $(shell $(PARSE_CONFIG) rtl_synth_uses_clk)
-RTL_SYN_CLK_SRC           ?= $(shell $(PARSE_CONFIG) rtl_synth_clk_src)
+RTL_SYN_USES_CLK                  ?= $(shell $(PARSE_CONFIG) rtl_synth_uses_clk)
+RTL_SYN_CLK_SRC                   ?= $(shell $(PARSE_CONFIG) rtl_synth_clk_src)
 # - rtl-synthesis-quartus
-RTL_SYN_Q_TARGET          ?= $(shell $(PARSE_CONFIG) rtl_synth_quartus_target)
-RTL_SYN_Q_DEVICE          ?= $(shell $(PARSE_CONFIG) rtl_synth_quartus_device)
-RTL_SYN_Q_CLK_MHZ         ?= $(shell $(PARSE_CONFIG) rtl_synth_quartus_clk_mhz)
+RTL_SYN_Q_TARGET                  ?= $(shell $(PARSE_CONFIG) rtl_synth_quartus_target)
+RTL_SYN_Q_DEVICE                  ?= $(shell $(PARSE_CONFIG) rtl_synth_quartus_device)
+RTL_SYN_Q_CLK_MHZ                 ?= $(shell $(PARSE_CONFIG) rtl_synth_quartus_clk_mhz)
 # - rtl-synthesis-yosys
-RTL_SYN_Y_TARGET          ?= $(shell $(PARSE_CONFIG) rtl_synth_yosys_target)
-RTL_SYN_Y_DEVICE          ?= $(shell $(PARSE_CONFIG) rtl_synth_yosys_device)
-RTL_SYN_Y_CLK_MHZ         ?= $(shell $(PARSE_CONFIG) rtl_synth_yosys_clk_mhz)
-RTL_SYN_Y_PNR_TOOL        ?= $(shell $(PARSE_CONFIG) rtl_synth_yosys_pnr_tool)
+RTL_SYN_Y_TARGET                  ?= $(shell $(PARSE_CONFIG) rtl_synth_yosys_target)
+RTL_SYN_Y_DEVICE                  ?= $(shell $(PARSE_CONFIG) rtl_synth_yosys_device)
+RTL_SYN_Y_CLK_MHZ                 ?= $(shell $(PARSE_CONFIG) rtl_synth_yosys_clk_mhz)
+RTL_SYN_Y_PNR_TOOL                ?= $(shell $(PARSE_CONFIG) rtl_synth_yosys_pnr_tool)
 # - sim
-SIM_MODULES               ?= $(shell $(PARSE_CONFIG) sim_modules)
-SIM_CREATE_VCD            ?= $(shell $(PARSE_CONFIG) sim_create_vcd)
-SIM_OPEN_WAVE             ?= $(shell $(PARSE_CONFIG) sim_open_wave)
+SIM_MODULES                       ?= $(shell $(PARSE_CONFIG) sim_modules)
+SIM_CREATE_VCD                    ?= $(shell $(PARSE_CONFIG) sim_create_vcd)
+SIM_OPEN_WAVE                     ?= $(shell $(PARSE_CONFIG) sim_open_wave)
 # - skip sim modules
-SKIP_SIM_MODULES          ?= $(shell $(PARSE_CONFIG) skip_sim_modules)
+SKIP_SIM_MODULES                  ?= $(shell $(PARSE_CONFIG) skip_sim_modules)
 # - sim-questasim
-SIM_QUESTA_MODE           ?= $(shell $(PARSE_CONFIG) sim_questa_mode)
-SIM_QUESTA_WAVE_DO        ?= $(shell $(PARSE_CONFIG) sim_questa_wave_do)
-SIM_QUESTA_CYCLES         ?= $(shell $(PARSE_CONFIG) sim_questa_cycles)
-SIM_QUESTA_VLOG_EXTRA     ?= $(shell $(PARSE_CONFIG) sim_questa_vlog_extra_flags)
-SIM_QUESTA_VSIM_EXTRA     ?= $(shell $(PARSE_CONFIG) sim_questa_vsim_extra_flags)
+SIM_QUESTA_MODE                   ?= $(shell $(PARSE_CONFIG) sim_questa_mode)
+SIM_QUESTA_WAVE_DO                ?= $(shell $(PARSE_CONFIG) sim_questa_wave_do)
+SIM_QUESTA_CYCLES                 ?= $(shell $(PARSE_CONFIG) sim_questa_cycles)
+SIM_QUESTA_VLOG_EXTRA             ?= $(shell $(PARSE_CONFIG) sim_questa_vlog_extra_flags)
+SIM_QUESTA_VSIM_EXTRA             ?= $(shell $(PARSE_CONFIG) sim_questa_vsim_extra_flags)
 # - fpga-test
-FPGA_TOP_MODULE           ?= $(shell $(PARSE_CONFIG) fpga_top)
-FPGA_VIRTUAL_PINS         ?= $(shell $(PARSE_CONFIG) fpga_virtual_pins)
-FPGA_BOARD_TEST           ?= $(shell $(PARSE_CONFIG) fpga_board_test)
-FPGA_USES_CLOCK           ?= $(shell $(PARSE_CONFIG) fpga_uses_clk)
-FPGA_CLOCK_SRC            ?= $(shell $(PARSE_CONFIG) fpga_clk_src)
+FPGA_TOP_MODULE                   ?= $(shell $(PARSE_CONFIG) fpga_top)
+FPGA_VIRTUAL_PINS                 ?= $(shell $(PARSE_CONFIG) fpga_virtual_pins)
+FPGA_BOARD_TEST                   ?= $(shell $(PARSE_CONFIG) fpga_board_test)
+FPGA_USES_CLOCK                   ?= $(shell $(PARSE_CONFIG) fpga_uses_clk)
+FPGA_CLOCK_SRC                    ?= $(shell $(PARSE_CONFIG) fpga_clk_src)
 # - fpga-test-altera
-ALTERA_TARGET             ?= $(shell $(PARSE_CONFIG) fpga_altera_target)
-ALTERA_DEVICE             ?= $(shell $(PARSE_CONFIG) fpga_altera_device)
-ALTERA_PACKAGE            ?= $(shell $(PARSE_CONFIG) fpga_altera_package)
-ALTERA_MIN_TEMP           ?= $(shell $(PARSE_CONFIG) fpga_altera_min_temp)
-ALTERA_MAX_TEMP           ?= $(shell $(PARSE_CONFIG) fpga_altera_max_temp)
-ALTERA_CLOCK_MHZ          ?= $(shell $(PARSE_CONFIG) fpga_altera_clk_mhz)
+ALTERA_TARGET                     ?= $(shell $(PARSE_CONFIG) fpga_altera_target)
+ALTERA_DEVICE                     ?= $(shell $(PARSE_CONFIG) fpga_altera_device)
+ALTERA_PACKAGE                    ?= $(shell $(PARSE_CONFIG) fpga_altera_package)
+ALTERA_MIN_TEMP                   ?= $(shell $(PARSE_CONFIG) fpga_altera_min_temp)
+ALTERA_MAX_TEMP                   ?= $(shell $(PARSE_CONFIG) fpga_altera_max_temp)
+ALTERA_CLOCK_MHZ                  ?= $(shell $(PARSE_CONFIG) fpga_altera_clk_mhz)
 # - fpga-test-lattice
-LATTICE_TARGET            ?= $(shell $(PARSE_CONFIG) fpga_lattice_target)
-LATTICE_DEVICE            ?= $(shell $(PARSE_CONFIG) fpga_lattice_device)
-LATTICE_PACKAGE           ?= $(shell $(PARSE_CONFIG) fpga_lattice_package)
-LATTICE_CLOCK_MHZ         ?= $(shell $(PARSE_CONFIG) fpga_lattice_clk_mhz)
-LATTICE_PNR_TOOL          ?= $(shell $(PARSE_CONFIG) fpga_lattice_pnr_tool)
+LATTICE_TARGET                    ?= $(shell $(PARSE_CONFIG) fpga_lattice_target)
+LATTICE_DEVICE                    ?= $(shell $(PARSE_CONFIG) fpga_lattice_device)
+LATTICE_PACKAGE                   ?= $(shell $(PARSE_CONFIG) fpga_lattice_package)
+LATTICE_CLOCK_MHZ                 ?= $(shell $(PARSE_CONFIG) fpga_lattice_clk_mhz)
+LATTICE_PNR_TOOL                  ?= $(shell $(PARSE_CONFIG) fpga_lattice_pnr_tool)
 # - fpga-rtl-sim
-FPGA_SIM_INC_MAIN_SIM_DIR ?= $(shell $(PARSE_CONFIG) fpga_sim_inc_main_sim_dir)
-FPGA_SIM_CREATE_VCD       ?= $(shell $(PARSE_CONFIG) fpga_sim_create_vcd)
-FPGA_SIM_OPEN_WAVE        ?= $(shell $(PARSE_CONFIG) fpga_sim_open_wave)
+FPGA_SIM_INC_MAIN_SIM_DIR         ?= $(shell $(PARSE_CONFIG) fpga_sim_inc_main_sim_dir)
+FPGA_SIM_CREATE_VCD               ?= $(shell $(PARSE_CONFIG) fpga_sim_create_vcd)
+FPGA_SIM_OPEN_WAVE                ?= $(shell $(PARSE_CONFIG) fpga_sim_open_wave)
 # - fpga-rtl-sim-altera
-FPGA_SIM_MODULES_ALTERA   ?= $(shell $(PARSE_CONFIG) fpga_sim_modules_altera)
+FPGA_SIM_MODULES_ALTERA           ?= $(shell $(PARSE_CONFIG) fpga_sim_modules_altera)
 # - fpga-rtl-sim-altera
-FPGA_SIM_MODULES_LATTICE  ?= $(shell $(PARSE_CONFIG) fpga_sim_modules_lattice)
+FPGA_SIM_MODULES_LATTICE          ?= $(shell $(PARSE_CONFIG) fpga_sim_modules_lattice)
 
 ### export variables ###
 export CONFIG_FILE
@@ -83,6 +87,9 @@ export RTL_LINTER_LICENSE
 export RTL_LINTER_REMOTE
 export RTL_LINTER_REMOTE_IP
 export RTL_LINTER_ENV_SOURCE
+export RTL_LINTER_VERILATOR_WNO_FLAGS
+export RTL_LINTER_VERILATOR_EXTRA_FLAGS
+export RTL_LINTER_VERILATOR_DEFINES
 export RTL_SYN_USES_CLK
 export RTL_SYN_CLK_SRC
 export RTL_SYN_Q_TARGET
