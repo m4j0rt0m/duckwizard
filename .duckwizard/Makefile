@@ -58,13 +58,15 @@ SVERILOG_SRC            =
 SVERILOG_HEADERS        =
 PACKAGE_SRC             =
 else
-VERILOG_SRC             = $(wildcard $(shell find $(RTL_DIRS) -type f \( -iname \*.v -o -iname \*.vhdl \)))
+VERILOG_SRC             = $(wildcard $(shell find $(RTL_DIRS) -type f \( -iname \*.v -o -iname \*.vhdl \) $(EXCLUDE_FLAGS) ))
 SVERILOG_SRC            = $(wildcard $(shell find $(RTL_DIRS) -type f \( -iname \*.sv -o -iname \*.svp \) $(EXCLUDE_FLAGS) ))
-SVERILOG_HEADERS        = $(wildcard $(shell find $(INCLUDE_DIRS) -type f \( -iname \*.svh -o -iname \*.sv \)))
-PACKAGE_SRC             = $(shell $(SCRIPTS_DIR)/order_sv_pkg $(wildcard $(shell find $(PACKAGE_DIRS) -type f \( -iname \*.sv \))))
+SVERILOG_HEADERS        = $(wildcard $(shell find $(INCLUDE_DIRS) -type f \( -iname \*.svh -o -iname \*.sv \) $(EXCLUDE_FLAGS) ))
+PACKAGE_SRC_WCARD       = $(wildcard $(shell find $(PACKAGE_DIRS) -type f \( -iname \*.sv \) $(EXCLUDE_FLAGS) ))
+PACKAGE_SRC_FILTERD     = $(if $(PACKAGE_SRC_WCARD),$(shell grep -rl "package .*;$$" -m1 $(PACKAGE_SRC_WCARD)),)
+PACKAGE_SRC             = $(shell $(SCRIPTS_DIR)/order_sv_pkg $(PACKAGE_SRC_FILTERD))
 endif
-VERILOG_HEADERS         = $(wildcard $(shell find $(INCLUDE_DIRS) -type f \( -iname \*.h -o -iname \*.vh -o -iname \*.v \)))
-MEM_SRC                 = $(wildcard $(shell find $(MEM_DIRS) -type f \( -iname \*.bin -o -iname \*.hex \)))
+VERILOG_HEADERS         = $(wildcard $(shell find $(INCLUDE_DIRS) -type f \( -iname \*.h -o -iname \*.vh -o -iname \*.v \) $(EXCLUDE_FLAGS) ))
+MEM_SRC                 = $(wildcard $(shell find $(MEM_DIRS) -type f \( -iname \*.bin -o -iname \*.hex \) $(EXCLUDE_FLAGS) ))
 RTL_SRC                 = $(VERILOG_SRC) $(SVERILOG_SRC) $(VERILOG_HEADERS) $(SVERILOG_HEADERS) $(PACKAGE_SRC) $(MEM_SRC)
 
 ### makefile includes ###
