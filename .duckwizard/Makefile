@@ -58,13 +58,15 @@ SVERILOG_SRC            =
 SVERILOG_HEADERS        =
 PACKAGE_SRC             =
 else
-VERILOG_SRC             = $(wildcard $(shell find $(RTL_DIRS) -type f \( -iname \*.v -o -iname \*.vhdl \)))
+VERILOG_SRC             = $(wildcard $(shell find $(RTL_DIRS) -type f \( -iname \*.v -o -iname \*.vhdl \) $(EXCLUDE_FLAGS) ))
 SVERILOG_SRC            = $(wildcard $(shell find $(RTL_DIRS) -type f \( -iname \*.sv -o -iname \*.svp \) $(EXCLUDE_FLAGS) ))
-SVERILOG_HEADERS        = $(wildcard $(shell find $(INCLUDE_DIRS) -type f \( -iname \*.svh -o -iname \*.sv \)))
-PACKAGE_SRC             = $(shell $(SCRIPTS_DIR)/order_sv_pkg $(wildcard $(shell find $(PACKAGE_DIRS) -type f \( -iname \*.sv \))))
+SVERILOG_HEADERS        = $(wildcard $(shell find $(INCLUDE_DIRS) -type f \( -iname \*.svh -o -iname \*.sv \) $(EXCLUDE_FLAGS) ))
+PACKAGE_SRC_WCARD       = $(wildcard $(shell find $(PACKAGE_DIRS) -type f \( -iname \*.sv \) $(EXCLUDE_FLAGS) ))
+PACKAGE_SRC_FILTERD     = $(if $(PACKAGE_SRC_WCARD),$(shell grep -rl "package .*;$$" -m1 $(PACKAGE_SRC_WCARD)),)
+PACKAGE_SRC             = $(shell $(SCRIPTS_DIR)/order_sv_pkg $(PACKAGE_SRC_FILTERD))
 endif
-VERILOG_HEADERS         = $(wildcard $(shell find $(INCLUDE_DIRS) -type f \( -iname \*.h -o -iname \*.vh -o -iname \*.v \)))
-MEM_SRC                 = $(wildcard $(shell find $(MEM_DIRS) -type f \( -iname \*.bin -o -iname \*.hex \)))
+VERILOG_HEADERS         = $(wildcard $(shell find $(INCLUDE_DIRS) -type f \( -iname \*.h -o -iname \*.vh -o -iname \*.v \) $(EXCLUDE_FLAGS) ))
+MEM_SRC                 = $(wildcard $(shell find $(MEM_DIRS) -type f \( -iname \*.bin -o -iname \*.hex \) $(EXCLUDE_FLAGS) ))
 RTL_SRC                 = $(VERILOG_SRC) $(SVERILOG_SRC) $(VERILOG_HEADERS) $(SVERILOG_HEADERS) $(PACKAGE_SRC) $(MEM_SRC)
 
 ### makefile includes ###
@@ -105,7 +107,7 @@ LINTER_REMOTE_OPTION    =
 endif
 ifeq ($(RTL_LINTER),spyglass)
 LINT                    = $(SPYGLASS_LINT)
-LINT_FLAGS              = --top $(TOP_MODULE) --files $(subst $(subst $(TOP_DIR)/,,$(PACKAGE_SRC)) $(TOP_DIR)/,,$(VERILOG_SRC)) $(subst $(TOP_DIR)/,,$(SVERILOG_SRC)) --includes $(subst $(TOP_DIR)/,,$(RTL_PATHS)) --sv --license $(RTL_LINTER_LICENSE) $(LINTER_REMOTE_OPTION) $(LINTER_ENV_OPTION) $(SPYGLASS_WAIVER_OPTION) --move --debug
+LINT_FLAGS              = --top $(TOP_MODULE) --files $(subst $(TOP_DIR)/,,$(PACKAGE_SRC)) $(subst $(TOP_DIR)/,,$(VERILOG_SRC)) $(subst $(TOP_DIR)/,,$(SVERILOG_SRC)) --includes $(subst $(TOP_DIR)/,,$(RTL_PATHS)) --sv --license $(RTL_LINTER_LICENSE) $(LINTER_REMOTE_OPTION) $(LINTER_ENV_OPTION) $(SPYGLASS_WAIVER_OPTION) --move --debug
 else
 LINT                    = $(VERILATOR_LINT)
 LINT_FLAGS              = --lint-only $(VERILATOR_LINT_FLAGS) --quiet-exit --error-limit 200 $(VERILATOR_CONFIG_FILE) $(INCLUDES_FLAGS) $(PACKAGE_SRC) $(TOP_MODULE_FILE)
