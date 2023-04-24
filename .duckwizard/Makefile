@@ -22,7 +22,7 @@ FPGA_TEST_DIR           = $(TOP_DIR)/fpga
 BUILD_DIR               = $(TOP_DIR)/build
 SCRIPTS_DIR             = $(DUCKWIZARD_DIR)/scripts
 DESIGN_RTL_DIR          = $(TOP_DIR)
-FILELIST                = $(if $(RTL_FILELIST),$(RTL_FILELIST),$(TOP_DIR)/filelist.f)
+DW_FILELIST             = $(if $(RTL_FILELIST),$(RTL_FILELIST),$(TOP_DIR)/filelist.f)
 DUCKWIZARD_FILES        = $(SCRIPTS_DIR)/duckWizard.list
 COMMIT_FILE             = $(DUCKWIZARD_DIR)/COMMIT
 VERSION_FILE            = $(DUCKWIZARD_DIR)/VERSION
@@ -374,8 +374,8 @@ init-repo:
 
 #H# filelist            : Create filelist.f
 filelist: $(RTL_SRC)
-	$(call print-filelist,$(FILELIST),$(TOP_DIR))
-	@echo -e "\n\u2714 [OK] Written into $(FILELIST)"
+	$(call print-filelist,$(DW_FILELIST),$(TOP_DIR))
+	@echo -e "\n\u2714 [OK] Written into $(DW_FILELIST)"
 
 #H# rm-git-db           : Remove GIT databases (.git and .gitmodules)
 rm-git-db: init-repo
