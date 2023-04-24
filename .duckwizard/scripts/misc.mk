@@ -23,7 +23,7 @@ RTL_ENV_FEATURE_GIT:=$(subst .git,$(if $(RTL_ENV_SUBFEATURE),-$(RTL_ENV_FEATURE)
 RTL_ENV_FEATURE_DIR:=$(if $(RTL_ENV_SUBFEATURE),$(RTL_ENV_FEATURE)/$(RTL_ENV_SUBFEATURE),$(RTL_ENV_FEATURE))
 
 ### filelist dir levels from root dir
-FILELIST_BASE:=$(shell $(SCRIPTS_DIR)/filelist_base $(FILELIST) $(TOP_DIR))
+FILELIST_BASE:=$(shell $(SCRIPTS_DIR)/filelist_base $(DW_FILELIST) $(TOP_DIR))
 
 ### check sv2v
 ifeq (, $(shell which sv2v))
