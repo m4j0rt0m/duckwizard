@@ -324,12 +324,15 @@ lint-fpga-test:
 
 #H# clean               : Clean the build directory
 clean: del-bak
-	rm -rf build/*
+	rm -rf ./build/*
+	rm -rf ./spyglass_output/*
 	rm -rf .duckwizard/simulation/questasim/transcript
 	rm -rf .duckwizard/simulation/questasim/vsim.wlf
 
 #H# clean-all           : Clean all the build directories
 clean-all: clean
+	rm -rf ./build
+	rm -rf ./spyglass_output
 	@syn_tool_list=($(SUPPORTED_SYNTHESIS));\
 	for sidx in `seq 0 $$(($${#syn_tool_list[@]}-1))`; do\
 		stool=$${syn_tool_list[$$sidx]};\
