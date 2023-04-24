@@ -41,19 +41,19 @@ define print-filelist
 	echo "# include directories" >> $(1);\
 	for idir in $(RTL_PATHS);\
 	do\
-		{ echo '+incdir+./'; echo "$${idir}" | grep -oP "^$(2)/\K.*";} | tr -d "\n"  >> $(1);\
+		{ echo '+incdir+$(FILELIST_BASE)'; echo "$${idir}" | grep -oP "^$(2)/\K.*";} | tr -d "\n"  >> $(1);\
 		echo "" >> $(1);\
 	done;\
 	echo -e "\n# packages" >> $(1);\
 	for psrc in $(PACKAGE_SRC);\
 	do\
-		{ echo './'; echo "$${psrc}" | grep -oP "^$(2)/\K.*";} | tr -d "\n" >> $(1);\
+		{ echo '$(FILELIST_BASE)'; echo "$${psrc}" | grep -oP "^$(2)/\K.*";} | tr -d "\n" >> $(1);\
 		echo "" >> $(1);\
 	done;\
 	echo -e "\n# rtl source files" >> $(1);\
 	for vsrc in $(VERILOG_SRC) $(SVERILOG_SRC);\
 	do\
-		{ echo './'; echo "$${vsrc}" | grep -oP "^$(2)/\K.*";} | tr -d "\n" >> $(1);\
+		{ echo '$(FILELIST_BASE)'; echo "$${vsrc}" | grep -oP "^$(2)/\K.*";} | tr -d "\n" >> $(1);\
 		echo "" >> $(1);\
 	done
 endef

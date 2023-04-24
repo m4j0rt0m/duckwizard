@@ -22,12 +22,18 @@ export _segment_
 RTL_ENV_FEATURE_GIT:=$(subst .git,$(if $(RTL_ENV_SUBFEATURE),-$(RTL_ENV_FEATURE)-$(RTL_ENV_SUBFEATURE).git,-$(RTL_ENV_FEATURE).git),$(REMOTE-URL-HTTPS))
 RTL_ENV_FEATURE_DIR:=$(if $(RTL_ENV_SUBFEATURE),$(RTL_ENV_FEATURE)/$(RTL_ENV_SUBFEATURE),$(RTL_ENV_FEATURE))
 
+### filelist dir levels from root dir
+FILELIST_BASE:=$(shell $(SCRIPTS_DIR)/filelist_base $(FILELIST) $(TOP_DIR))
+
 ### check sv2v
 ifeq (, $(shell which sv2v))
 SV2V_IN_PATH:=false
 else
 SV2V_IN_PATH:=true
 endif
+
+filelist-test-info:
+	@echo "filelist_base: '${FILELIST_BASE}'"
 
 #H# print-config        : Display project configuration
 print-config: check-config
