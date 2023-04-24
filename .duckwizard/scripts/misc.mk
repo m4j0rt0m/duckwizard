@@ -127,6 +127,40 @@ check-sv2v:
 install-sv2v:
 	@$(SCRIPTS_DIR)/install-sv2v
 
+#H# show-dirs           : Show automatically recognized rtl directories
+show-dirs:
+	@rtl_dirs_list=($(RTL_DIRS));\
+	inc_dirs_list=($(INCLUDE_DIRS));\
+	pkg_dirs_list=($(PACKAGE_DIRS));\
+	mem_dirs_list=($(MEM_DIRS));\
+	rtl_paths_list=($(RTL_PATHS));\
+	echo -e "RTL DIRS:";\
+	for idx in `seq 0 $$(($${#rtl_dirs_list[@]}-1))`; do\
+			rtl_dir=$${rtl_dirs_list[$$idx]};\
+			echo -e "[$$idx] $${rtl_dir}";\
+	done;\
+	echo -e "INCLUDE DIRS:";\
+	for idx in `seq 0 $$(($${#inc_dirs_list[@]}-1))`; do\
+			inc_dir=$${inc_dirs_list[$$idx]};\
+			echo -e "[$$idx] $${inc_dir}";\
+	done;\
+	echo -e "PACKAGE DIRS:";\
+	for idx in `seq 0 $$(($${#pkg_dirs_list[@]}-1))`; do\
+			pkg_dir=$${pkg_dirs_list[$$idx]};\
+			echo -e "[$$idx] $${pkg_dir}";\
+	done;\
+	echo -e "MEM DIRS:";\
+	for idx in `seq 0 $$(($${#mem_dirs_list[@]}-1))`; do\
+			mem_dir=$${mem_dirs_list[$$idx]};\
+			echo -e "[$$idx] $${mem_dir}";\
+	done;\
+	echo -e "RTL PATHS:";\
+	for idx in `seq 0 $$(($${#rtl_paths_list[@]}-1))`; do\
+			rtl_path=$${rtl_paths_list[$$idx]};\
+			echo -e "[$$idx] $${rtl_path}";\
+	done;\
+	echo -e "TOP MODULE: $(TOP_MODULE)"
+
 #H# update-commit-file  : Update commit hash file
 update-commit-file:
 	@echo $(COMMIT_HASH) > $(COMMIT_FILE)
