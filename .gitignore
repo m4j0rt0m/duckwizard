@@ -1,3 +1,7 @@
 build/
 spyglass_output/
 .sv2v/
+modelsim.ini
+vsim_stacktrace.vstf
+*.log
+vsim.wlf

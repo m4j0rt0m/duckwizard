@@ -1,0 +1,52 @@
+#!/bin/bash
+
+DNAME=$(dirname "$1")
+
+if [ ! -d ${DNAME} ]; then
+  mkdir -p ${DNAME}
+fi
+
+DIR=$(realpath --relative-to="$2" "$1")
+nDIR=$(realpath --relative-to="$1" "$2")
+
+POS_DIR="./"
+NEG_DIR="../"
+
+IFS="/" read -ra PARTS <<< "${DIR}"
+pos=${#PARTS[@]}
+
+s=${DIR//"$NEG_DIR"}
+neg="$(((${#DIR} - ${#s}) / ${#NEG_DIR}))"
+
+if [ ${pos} -gt 1 ]; then
+  pbase=""
+  for (( i=1; i<${pos}; i++ )) do
+    pbase=${pbase}${NEG_DIR}
+  done
+else
+  pbase=${POS_DIR}
+fi
+nbase="./${nDIR##${NEG_DIR}}/"
+
+if [ ${neg} -gt 0 ]; then
+  base=${nbase}
+else
+  base=${pbase}
+fi
+
+if [[ "$3" == "debug" ]]; then
+  echo "[+] Debugging some variables:"
+  echo "  [${DNAME}]"
+  echo "  [${DIR}]"
+  echo "  [${nDIR}]"
+  echo "  [${nbase}]"
+  echo "  $(((${#DIR} - ${#s}) / ${#NEG_DIR}))"
+  echo "  PARTS   : ${PARTS[@]}"
+  echo "  pos     : ${pos}"
+  echo "  neg     : ${neg}"
+  echo "  pbase   : ${pbase}"
+  echo "  nbase   : ${nbase}"
+  echo "  base    : ${base}"
+else
+  echo "${base}"
+fi
