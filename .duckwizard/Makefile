@@ -1,13 +1,13 @@
 # Author:      Abraham J. Ruiz R.
 # Description: Main project Makefile for linting, synthesis, simulation ant testing features
-# Version:     1.3.3
+# Version:     1.3.4
 # Url:         https://github.com/m4j0rt0m/duckwizard
 
 ### header flags ###
 SHELL                  := /bin/bash
 REMOTE-URL-SSH         := git@github.com:m4j0rt0m/duckwizard.git
 REMOTE-URL-HTTPS       := https://github.com/m4j0rt0m/duckwizard.git
-VERSION                := 1.3.3
+VERSION                := 1.3.4
 
 ### top directory ###
 MKFILE_PATH             = $(abspath $(firstword $(MAKEFILE_LIST)))
@@ -23,6 +23,7 @@ BUILD_DIR               = $(TOP_DIR)/build
 SCRIPTS_DIR             = $(DUCKWIZARD_DIR)/scripts
 DESIGN_RTL_DIR          = $(TOP_DIR)
 DW_FILELIST             = $(if $(RTL_FILELIST),$(RTL_FILELIST),$(TOP_DIR)/filelist.f)
+DW_FILELIST_PREFIX      = $(if $(RTL_FILELIST_PREFIX),$${$(RTL_FILELIST_PREFIX)},)
 DUCKWIZARD_FILES        = $(SCRIPTS_DIR)/duckWizard.list
 COMMIT_FILE             = $(DUCKWIZARD_DIR)/COMMIT
 VERSION_FILE            = $(DUCKWIZARD_DIR)/VERSION
