@@ -125,20 +125,25 @@ all: lint rtl-synth rtl-sim fpga-test
 
 #H# veritedium          : Run veritedium AUTO features
 veritedium:
-	@echo -e "$(_flag_)Running Veritedium Autocomplete..."
+	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_flag_)Running Veritedium Autocomplete..."; fi
 	@$(foreach SRC,$(VERILOG_SRC),$(call veritedium-command,$(SRC)))
 	@$(foreach SRC,$(SVERILOG_SRC),$(call veritedium-command,$(SRC)))
-	@echo -e "$(_flag_)Deleting unnecessary backup files (*~ or *.bak)..."
-	find ./* -name "*~" -delete
-	find ./* -name "*.bak" -delete
-	@echo -e "$(_flag_)Finished!$(_reset_)"
+	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_flag_)Deleting unnecessary backup files (*~ or *.bak)..."; fi
+	@find ./* -name "*~" -delete
+	@find ./* -name "*.bak" -delete
+	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_flag_)Finished!$(_reset_)"; fi
 
 #H# lint                : Run the RTL code linter
+ifeq ("$(DW_VERBOSE)","yes")
 lint: print-rtl-srcs
+else
+lint:
+endif
 	@if [[ "$(TOP_MODULE)" == "" ]]; then\
 		echo -e "$(_error_)[ERROR] No defined top module!$(_reset_)";\
+		exit;\
 	else\
-		echo -e "$(_info_)\n[INFO] Linting using $(LINT) tool$(_reset_)";\
+		if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_info_)\n[INFO] Linting using $(LINT) tool$(_reset_)"; fi;\
 		for tmodule in $(TOP_MODULE); do\
 			$(MAKE) lint-module TOP_MODULE=$${tmodule};\
 		done;\
@@ -146,9 +151,11 @@ lint: print-rtl-srcs
 
 #H# lint-module         : Run pre-specified linter for <top module>, use 'make lint' instead
 lint-module:
-	@echo -e "$(_flag_)\n [+] Top Module : [ $(TOP_MODULE) ]\n$(_reset_)";\
-	echo "$(RTL_LINTER)";\
-	echo -e "$(_flag_) cmd: $(LINT) $(LINT_FLAGS)\n$(_reset_)";\
+	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then\
+		echo -e "$(_flag_)\n [+] Top Module : [ $(TOP_MODULE) ]\n$(_reset_)";\
+		echo "$(RTL_LINTER)";\
+		echo -e "$(_flag_) cmd: $(LINT) $(LINT_FLAGS)\n$(_reset_)";\
+	fi;\
 	$(LINT) $(LINT_FLAGS);\
 
 #H# rtl-synth           : Run RTL synthesis

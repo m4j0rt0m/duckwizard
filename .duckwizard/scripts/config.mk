@@ -5,6 +5,8 @@ PARSE_CONFIG               = $(SCRIPTS_DIR)/parse_config $(CONFIG_FILE)
 ### project configuration ###
 PROJECT                           ?= $(shell $(PARSE_CONFIG) project)
 TOP_MODULE                        ?= $(shell $(PARSE_CONFIG) rtl_top)
+# - duckwizard verbose
+DW_VERBOSE                        ?= $(shell $(PARSE_CONFIG) dw_verbose)
 # - project-features
 RTL_LINTER                        ?= $(shell $(PARSE_CONFIG) rtl_linter)
 RTL_SYN_TOOLS                     ?= $(shell $(PARSE_CONFIG) rtl_synth_tools)
