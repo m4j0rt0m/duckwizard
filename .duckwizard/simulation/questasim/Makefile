@@ -67,12 +67,14 @@ GTK_FILE              = $(TB_SOURCE_DIR)/scripts/$(SIM_TOP_MODULE).gtkw
 VLIB_DIR              = $(BUILD_DIR)
 VMAP_FLAGS            = work $(VLIB_DIR)
 VLOG_EXTRA_FLAGS      = $(SIM_QUESTA_VLOG_EXTRA)
-VLOG_FLAGS            = -sv +acc=rn -mfcu $(VLOG_EXTRA_FLAGS) -work $(VLIB_DIR) $(INCLUDES_FLAGS) $(RTL_SRC)
+VLOG_TRANSCRIPT       = -l $(BUILD_DIR)/comp_transcript
+VLOG_FLAGS            = -sv +acc=rn -mfcu $(VLOG_EXTRA_FLAGS) $(VLOG_TRANSCRIPT) -work $(VLIB_DIR) $(INCLUDES_FLAGS) $(RTL_SRC)
 VSIM_EXTRA_FLAGS      = $(SIM_QUESTA_VSIM_EXTRA)
+VSIM_TRANSCRIPT       = -l $(BUILD_DIR)/sim_transcript
 VSIM_CYCLES          := $(if $(SIM_QUESTA_CYCLES),$(SIM_QUESTA_CYCLES),-all)
 VSIM_MODE            ?= $(SIM_QUESTA_MODE)
 VSIM_WAVE_DO         := $(if $(SIM_QUESTA_WAVE_DO),-do $(TB_SOURCE_DIR)/scripts/$(SIM_QUESTA_WAVE_DO),)
-VSIM_FLAGS            = work.$(SIM_TOP_MODULE) $(VSIM_EXTRA_FLAGS) $(VSIM_MODE) $(VSIM_WAVE_DO) -do "run $(VSIM_CYCLES)"
+VSIM_FLAGS            = $(VSIM_TRANSCRIPT) work.$(SIM_TOP_MODULE) $(VSIM_EXTRA_FLAGS) $(VSIM_MODE) $(VSIM_WAVE_DO) -do "run $(VSIM_CYCLES)"
 
 ### sv2v flags ###
 SV2V_SOURCE :=

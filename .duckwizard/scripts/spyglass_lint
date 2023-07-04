@@ -69,18 +69,18 @@ function create_project {
   echo -e "\nSpyGlass project:\n"
   echo "#!SPYGLASS_PROJECT_FILE" | tee $project_file
   echo "#!VERSION 3.0" | tee -a $project_file
+  if [ $parsed_include == true ]; then
+    for include_path in ${include_list[@]}
+    do
+      echo "set_option incdir { $include_path }" | tee -a $project_file
+    done
+  fi
   for file in ${file_list[@]}
   do
     echo "read_file -type verilog $file" | tee -a $project_file
   done
   if [ $parsed_waiver == true ]; then
     echo "read_file -type awl ${awl_file}" | tee -a $project_file
-  fi
-  if [ $parsed_include == true ]; then
-    for include_path in ${include_list[@]}
-    do
-      echo "set_option incdir { $include_path }" | tee -a $project_file
-    done
   fi
   if [ $parsed_sv == true ]; then
     echo "set_option enableSV09 yes" | tee -a $project_file

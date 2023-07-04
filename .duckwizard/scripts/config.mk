@@ -14,6 +14,9 @@ SIM_TOOL                          ?= $(shell $(PARSE_CONFIG) sim_tool)
 FPGA_TEST                         ?= $(shell $(PARSE_CONFIG) fpga_test)
 FPGA_SIM_TEST                     ?= $(shell $(PARSE_CONFIG) fpga_sim_test)
 FPGA_SIM_TOOL                     ?= $(shell $(PARSE_CONFIG) fpga_sim_tool)
+# - rtl filelist
+RTL_FILELIST                      ?= $(shell $(PARSE_CONFIG) rtl_filelist)
+RTL_FILELIST_PREFIX               ?= $(shell $(PARSE_CONFIG) rtl_filelist_prefix)
 # - skip modules
 SKIP_MODULES                      ?= $(shell $(PARSE_CONFIG) skip_modules)
 # - sv2v usage
@@ -82,6 +85,8 @@ FPGA_SIM_MODULES_LATTICE          ?= $(shell $(PARSE_CONFIG) fpga_sim_modules_la
 ### export variables ###
 export CONFIG_FILE
 export PROJECT
+export RTL_FILELIST
+export RTL_FILELIST_PREFIX
 export USE_SV2V
 export SKIP_MODULES
 export RTL_LINTER

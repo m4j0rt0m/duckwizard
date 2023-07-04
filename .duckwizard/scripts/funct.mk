@@ -38,19 +38,22 @@ endef
 ### function define: print filelist ###
 define print-filelist
 	@> $(1);\
-	for idir in $(INCLUDE_DIRS);\
+	echo "# include directories" >> $(1);\
+	for idir in $(RTL_PATHS);\
 	do\
-		{ echo '+incdir+$${DESIGN_RTL_DIR}/'; echo "$${idir}" | grep -oP "^$(2)/\K.*";} | tr -d "\n"  >> $(1);\
+		{ echo '+incdir+$(DW_FILELIST_PREFIX)$(FILELIST_BASE)'; echo "$${idir}" | grep -oP "^$(2)/\K.*";} | tr -d "\n"  >> $(1);\
 		echo "" >> $(1);\
 	done;\
+	echo -e "\n# packages" >> $(1);\
 	for psrc in $(PACKAGE_SRC);\
 	do\
-		{ echo '$${DESIGN_RTL_DIR}/'; echo "$${psrc}" | grep -oP "^$(2)/\K.*";} | tr -d "\n" >> $(1);\
+		{ echo '$(DW_FILELIST_PREFIX)$(FILELIST_BASE)'; echo "$${psrc}" | grep -oP "^$(2)/\K.*";} | tr -d "\n" >> $(1);\
 		echo "" >> $(1);\
 	done;\
+	echo -e "\n# rtl source files" >> $(1);\
 	for vsrc in $(VERILOG_SRC) $(SVERILOG_SRC);\
 	do\
-		{ echo '$${DESIGN_RTL_DIR}/'; echo "$${vsrc}" | grep -oP "^$(2)/\K.*";} | tr -d "\n" >> $(1);\
+		{ echo '$(DW_FILELIST_PREFIX)$(FILELIST_BASE)'; echo "$${vsrc}" | grep -oP "^$(2)/\K.*";} | tr -d "\n" >> $(1);\
 		echo "" >> $(1);\
 	done
 endef

@@ -1,13 +1,13 @@
 # Author:      Abraham J. Ruiz R.
 # Description: Main project Makefile for linting, synthesis, simulation ant testing features
-# Version:     1.3.2
+# Version:     1.3.4
 # Url:         https://github.com/m4j0rt0m/duckwizard
 
 ### header flags ###
 SHELL                  := /bin/bash
 REMOTE-URL-SSH         := git@github.com:m4j0rt0m/duckwizard.git
 REMOTE-URL-HTTPS       := https://github.com/m4j0rt0m/duckwizard.git
-VERSION                := 1.3.2
+VERSION                := 1.3.4
 
 ### top directory ###
 MKFILE_PATH             = $(abspath $(firstword $(MAKEFILE_LIST)))
@@ -22,7 +22,8 @@ FPGA_TEST_DIR           = $(TOP_DIR)/fpga
 BUILD_DIR               = $(TOP_DIR)/build
 SCRIPTS_DIR             = $(DUCKWIZARD_DIR)/scripts
 DESIGN_RTL_DIR          = $(TOP_DIR)
-FILELIST                = $(TOP_DIR)/filelist.f
+DW_FILELIST             = $(if $(RTL_FILELIST),$(RTL_FILELIST),$(TOP_DIR)/filelist.f)
+DW_FILELIST_PREFIX      = $(if $(RTL_FILELIST_PREFIX),$${$(RTL_FILELIST_PREFIX)},)
 DUCKWIZARD_FILES        = $(SCRIPTS_DIR)/duckWizard.list
 COMMIT_FILE             = $(DUCKWIZARD_DIR)/COMMIT
 VERSION_FILE            = $(DUCKWIZARD_DIR)/VERSION
@@ -331,12 +332,15 @@ lint-fpga-test:
 
 #H# clean               : Clean the build directory
 clean: del-bak
-	rm -rf build/*
+	rm -rf ./build/*
+	rm -rf ./spyglass_output/*
 	rm -rf .duckwizard/simulation/questasim/transcript
 	rm -rf .duckwizard/simulation/questasim/vsim.wlf
 
 #H# clean-all           : Clean all the build directories
 clean-all: clean
+	rm -rf ./build
+	rm -rf ./spyglass_output
 	@syn_tool_list=($(SUPPORTED_SYNTHESIS));\
 	for sidx in `seq 0 $$(($${#syn_tool_list[@]}-1))`; do\
 		stool=$${syn_tool_list[$$sidx]};\
@@ -378,8 +382,8 @@ init-repo:
 
 #H# filelist            : Create filelist.f
 filelist: $(RTL_SRC)
-	$(call print-filelist,$(FILELIST),$(TOP_DIR))
-	@echo -e "\n\u2714 [OK] Written into $(FILELIST)"
+	$(call print-filelist,$(DW_FILELIST),$(TOP_DIR))
+	@echo -e "\n\u2714 [OK] Written into $(DW_FILELIST)"
 
 #H# rm-git-db           : Remove GIT databases (.git and .gitmodules)
 rm-git-db: init-repo

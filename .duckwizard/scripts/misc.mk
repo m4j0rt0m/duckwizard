@@ -22,12 +22,18 @@ export _segment_
 RTL_ENV_FEATURE_GIT:=$(subst .git,$(if $(RTL_ENV_SUBFEATURE),-$(RTL_ENV_FEATURE)-$(RTL_ENV_SUBFEATURE).git,-$(RTL_ENV_FEATURE).git),$(REMOTE-URL-HTTPS))
 RTL_ENV_FEATURE_DIR:=$(if $(RTL_ENV_SUBFEATURE),$(RTL_ENV_FEATURE)/$(RTL_ENV_SUBFEATURE),$(RTL_ENV_FEATURE))
 
+### filelist dir levels from root dir
+FILELIST_BASE:=$(shell $(SCRIPTS_DIR)/filelist_base $(DW_FILELIST) $(TOP_DIR))
+
 ### check sv2v
 ifeq (, $(shell which sv2v))
 SV2V_IN_PATH:=false
 else
 SV2V_IN_PATH:=true
 endif
+
+filelist-test-info:
+	@echo "filelist_base: '${FILELIST_BASE}'"
 
 #H# print-config        : Display project configuration
 print-config: check-config
@@ -92,6 +98,18 @@ print-config: check-config
 print-rtl-srcs:
 	$(call print-srcs-command)
 
+#H# print-pkgs          : Print SV Packages source list (hierarchically ordered)
+print-pkgs:
+	@list_pkg=($(PACKAGE_SRC));\
+	for idx in `seq 0 $$(($${#list_pkg[@]}-1))`; do\
+		pkg_src=$${list_pkg[$$idx]};\
+		echo "$${pkg_src}";\
+	done
+
+#H# print-pkgs-line     : Print SV Packages source in a single line (hierarchically ordered)
+print-pkgs-line:
+	@echo $(PACKAGE_SRC)
+
 #H# check-dir-env       : Check if exists, if not, create the RTL env directory <RTL_ENV_FEATURE> <RTL_ENV_SUBFEATURE>
 check-dir-env:
 	@if [ ! -d $(RTL_ENV_FEATURE_DIR) ]; then\
@@ -108,6 +126,40 @@ check-sv2v:
 #H# install-sv2v        : Install sv2v tool (SystemVerilog to Verilog code conversion tool)
 install-sv2v:
 	@$(SCRIPTS_DIR)/install-sv2v
+
+#H# show-dirs           : Show automatically recognized rtl directories
+show-dirs:
+	@rtl_dirs_list=($(RTL_DIRS));\
+	inc_dirs_list=($(INCLUDE_DIRS));\
+	pkg_dirs_list=($(PACKAGE_DIRS));\
+	mem_dirs_list=($(MEM_DIRS));\
+	rtl_paths_list=($(RTL_PATHS));\
+	echo -e "RTL DIRS:";\
+	for idx in `seq 0 $$(($${#rtl_dirs_list[@]}-1))`; do\
+			rtl_dir=$${rtl_dirs_list[$$idx]};\
+			echo -e "[$$idx] $${rtl_dir}";\
+	done;\
+	echo -e "INCLUDE DIRS:";\
+	for idx in `seq 0 $$(($${#inc_dirs_list[@]}-1))`; do\
+			inc_dir=$${inc_dirs_list[$$idx]};\
+			echo -e "[$$idx] $${inc_dir}";\
+	done;\
+	echo -e "PACKAGE DIRS:";\
+	for idx in `seq 0 $$(($${#pkg_dirs_list[@]}-1))`; do\
+			pkg_dir=$${pkg_dirs_list[$$idx]};\
+			echo -e "[$$idx] $${pkg_dir}";\
+	done;\
+	echo -e "MEM DIRS:";\
+	for idx in `seq 0 $$(($${#mem_dirs_list[@]}-1))`; do\
+			mem_dir=$${mem_dirs_list[$$idx]};\
+			echo -e "[$$idx] $${mem_dir}";\
+	done;\
+	echo -e "RTL PATHS:";\
+	for idx in `seq 0 $$(($${#rtl_paths_list[@]}-1))`; do\
+			rtl_path=$${rtl_paths_list[$$idx]};\
+			echo -e "[$$idx] $${rtl_path}";\
+	done;\
+	echo -e "TOP MODULE: $(TOP_MODULE)"
 
 #H# update-commit-file  : Update commit hash file
 update-commit-file:
