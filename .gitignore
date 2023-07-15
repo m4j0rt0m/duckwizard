@@ -5,3 +5,4 @@ modelsim.ini
 vsim_stacktrace.vstf
 *.log
 vsim.wlf
+*.swp
