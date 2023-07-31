@@ -89,7 +89,7 @@ all: sim
 #H# sim             : Run simulation
 ifeq ($(USE_SV2V),yes)
 sim: sv2v-srcs-questa
-	$(MAKE) SV2V_RERUN=yes sim-sv2v
+	$(MAKE) -s SV2V_RERUN=yes sim-sv2v
 sim-sv2v: clean-top run-sim
 else
 sim: clean-top run-sim
@@ -116,7 +116,7 @@ run-sim:
 sv2v-srcs-questa:
 	@rm -rvf .sv2v/*
 	@mkdir -p $(SV2V_RTL_DIR)
-	@for src in $(SVERILOG_SRC); do $(MAKE) sv2v-convert-questa SV2V_SOURCE=$${src}; done
+	@for src in $(SVERILOG_SRC); do $(MAKE) -s sv2v-convert-questa SV2V_SOURCE=$${src}; done
 
 #H# sv2v-convert    : Convert SystemVerilog module to Verilog
 sv2v-convert-questa: check-sv2v

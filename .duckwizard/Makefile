@@ -126,36 +126,43 @@ all: lint rtl-synth rtl-sim fpga-test
 
 #H# veritedium          : Run veritedium AUTO features
 veritedium:
-	@echo -e "$(_flag_)Running Veritedium Autocomplete..."
+	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_flag_)Running Veritedium Autocomplete..."; fi
 	@$(foreach SRC,$(VERILOG_SRC),$(call veritedium-command,$(SRC)))
 	@$(foreach SRC,$(SVERILOG_SRC),$(call veritedium-command,$(SRC)))
-	@echo -e "$(_flag_)Deleting unnecessary backup files (*~ or *.bak)..."
-	find ./* -name "*~" -delete
-	find ./* -name "*.bak" -delete
-	@echo -e "$(_flag_)Finished!$(_reset_)"
+	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_flag_)Deleting unnecessary backup files (*~ or *.bak)..."; fi
+	@find ./* -name "*~" -delete
+	@find ./* -name "*.bak" -delete
+	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_flag_)Finished!$(_reset_)"; fi
 
 #H# lint                : Run the RTL code linter
+ifeq ("$(DW_VERBOSE)","yes")
 lint: print-rtl-srcs
+else
+lint:
+endif
 	@if [[ "$(TOP_MODULE)" == "" ]]; then\
 		echo -e "$(_error_)[ERROR] No defined top module!$(_reset_)";\
+		exit;\
 	else\
-		echo -e "$(_info_)\n[INFO] Linting using $(LINT) tool$(_reset_)";\
+		if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_info_)\n[INFO] Linting using $(LINT) tool$(_reset_)"; fi;\
 		for tmodule in $(TOP_MODULE); do\
-			$(MAKE) lint-module TOP_MODULE=$${tmodule};\
+			$(MAKE) -s lint-module TOP_MODULE=$${tmodule};\
 		done;\
 	fi
 
 #H# lint-module         : Run pre-specified linter for <top module>, use 'make lint' instead
 lint-module:
-	@echo -e "$(_flag_)\n [+] Top Module : [ $(TOP_MODULE) ]\n$(_reset_)";\
-	echo "$(RTL_LINTER)";\
-	echo -e "$(_flag_) cmd: $(LINT) $(LINT_FLAGS)\n$(_reset_)";\
+	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then\
+		echo -e "$(_flag_)\n [+] Top Module : [ $(TOP_MODULE) ]\n$(_reset_)";\
+		echo "$(RTL_LINTER)";\
+		echo -e "$(_flag_) cmd: $(LINT) $(LINT_FLAGS)\n$(_reset_)";\
+	fi;\
 	$(LINT) $(LINT_FLAGS);\
 
 #H# rtl-synth           : Run RTL synthesis
 ifeq ($(USE_SV2V),yes)
 rtl-synth: sv2v-srcs
-	$(MAKE) SV2V_RERUN=yes rtl-synth-run
+	$(MAKE) -s SV2V_RERUN=yes rtl-synth-run
 rtl-synth-run:
 else
 rtl-synth:
@@ -175,7 +182,7 @@ endif
 				for tidx in `seq 0 $$(($${#tmodule_list[@]}-1))`; do\
 					tmodule=$${tmodule_list[$$tidx]};\
 					echo -e "$(_flag_)\n [*] Synthesis Top Module : $${tmodule}\n$(_reset_)";\
-					$(MAKE) -C $(SYNTHESIS_ENV_DIR)/$${stool} rtl-synth\
+					$(MAKE) -s -C $(SYNTHESIS_ENV_DIR)/$${stool} rtl-synth\
 						TOP_MODULE=$${tmodule}\
 						SYN_BUILD_DIR="$(BUILD_DIR)/syn/$${stool}"\
 						VERILOG_SRC="$(VERILOG_SRC) $(SVERILOG_SRC)"\
@@ -205,7 +212,7 @@ rtl-sim:
 				for sidx in `seq 0 $$(($${#smodule_list[@]}-1))`; do\
 					smodule=$${smodule_list[$$sidx]};\
 					echo -e "$(_flag_)\n [*] Simulating Top Module : $${smodule}\n$(_reset_)";\
-					$(MAKE) -C $(SIMULATION_ENV_DIR)/$${stool} sim\
+					$(MAKE) -s -C $(SIMULATION_ENV_DIR)/$${stool} sim\
 						SIM_TOP_MODULE=$${smodule}\
 						SIM_TOOL=$${stool}\
 						SIM_SOURCE_DIR="$(TB_SOURCE_DIR)"\
@@ -233,14 +240,14 @@ fpga-test:
 		ftest_list=($(FPGA_TEST));\
 		for fidx in `seq 0 $$(($${#ftest_list[@]}-1))`; do\
 			ftest=$${ftest_list[$$fidx]};\
-			$(MAKE) check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
+			$(MAKE) -s check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
 			fpga_target=$${ftest^^}_TARGET;\
 			fpga_device=$${ftest^^}_DEVICE;\
 			echo -e "$(_flag_)\n [*] Running compilation flow - $${ftest^}";\
 			echo -e "  |-> Target     : $${!fpga_target}";\
 			echo -e "  |-> Device     : $${!fpga_device}";\
 			echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
-			$(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} $${ftest}-project\
+			$(MAKE) -s -C $(FPGA_TEST_DIR)/$${ftest} $${ftest}-project\
 				EXT_VERILOG_SRC="$(VERILOG_SRC) $(SVERILOG_SRC)"\
 				EXT_VERILOG_HEADERS="$(VERILOG_HEADERS) $(SVERILOG_HEADERS)"\
 				EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
@@ -261,11 +268,11 @@ fpga-rtl-sim:
 		stool_list=($(FPGA_SIM_TOOL));\
 		for fidx in `seq 0 $$(($${#fsim_list[@]}-1))`; do\
 			fsim=$${fsim_list[$$fidx]};\
-			$(MAKE) check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${fsim};\
+			$(MAKE) -s check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${fsim};\
 			fsim_modules=FPGA_SIM_MODULES_$${fsim^^};\
 			for sidx in `seq 0 $$(($${#stool_list[@]}-1))`; do\
 				stool=$${stool_list[$$sidx]};\
-				$(MAKE) -C $(FPGA_TEST_DIR)/$${fsim} fpga-rtl-sim\
+				$(MAKE) -s -C $(FPGA_TEST_DIR)/$${fsim} fpga-rtl-sim\
 					FPGA_SIM_MODULES="$${!fsim_modules}"\
 					SIM_TOOL="$${stool}"\
 					SIM_CREATE_VCD=$(FPGA_SIM_CREATE_VCD)\
@@ -287,14 +294,14 @@ fpga-flash:
 		ftest_list=($(FPGA_TEST));\
 		for fidx in `seq 0 $$(($${#ftest_list[@]}-1))`; do\
 			ftest=$${ftest_list[$$fidx]};\
-			$(MAKE) check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
+			$(MAKE) -s check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
 			fpga_target=$${ftest^^}_TARGET;\
 			fpga_device=$${ftest^^}_DEVICE;\
 			echo -e "$(_flag_)\n [*] Running flash FPGA job - $${ftest^}";\
 			echo -e "  |-> Target     : $${!fpga_target}";\
 			echo -e "  |-> Device     : $${!fpga_device}";\
 			echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
-			$(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} $${ftest}-flash-fpga\
+			$(MAKE) -s -C $(FPGA_TEST_DIR)/$${ftest} $${ftest}-flash-fpga\
 				EXT_VERILOG_SRC="$(VERILOG_SRC) $(SVERILOG_SRC)"\
 				EXT_VERILOG_HEADERS="$(VERILOG_HEADERS) $(SVERILOG_HEADERS)"\
 				EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
@@ -311,10 +318,10 @@ lint-fpga-test:
 		ftest_list=($(FPGA_TEST));\
 		for fidx in `seq 0 $$(($${#ftest_list[@]}-1))`; do\
 			ftest=$${ftest_list[$$fidx]};\
-			$(MAKE) check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
+			$(MAKE) -s check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
 			echo -e "$(_flag_)\n [*] Running linter for $${ftest^} FPGA test";\
 			echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
-			$(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} lint\
+			$(MAKE) -s -C $(FPGA_TEST_DIR)/$${ftest} lint\
 				EXT_VERILOG_SRC="$(VERILOG_SRC) $(SVERILOG_SRC)"\
 				EXT_VERILOG_HEADERS="$(VERILOG_HEADERS) $(SVERILOG_HEADERS)"\
 				EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
@@ -337,25 +344,25 @@ clean-all: clean
 	@syn_tool_list=($(SUPPORTED_SYNTHESIS));\
 	for sidx in `seq 0 $$(($${#syn_tool_list[@]}-1))`; do\
 		stool=$${syn_tool_list[$$sidx]};\
-		if [ -d $(SYNTHESIS_ENV_DIR)/$${stool} ]; then $(MAKE) -C $(SYNTHESIS_ENV_DIR)/$${stool} clean; fi;\
+		if [ -d $(SYNTHESIS_ENV_DIR)/$${stool} ]; then $(MAKE) -s -C $(SYNTHESIS_ENV_DIR)/$${stool} clean; fi;\
 	done
 	@sim_tool_list=($(SUPPORTED_SIMULATION));\
 	for sidx in `seq 0 $$(($${#sim_tool_list[@]}-1))`; do\
 		stool=$${sim_tool_list[$$sidx]};\
-		if [ -d $(SIMULATION_ENV_DIR)/$${stool} ]; then $(MAKE) -C $(SIMULATION_ENV_DIR)/$${stool} clean; fi;\
+		if [ -d $(SIMULATION_ENV_DIR)/$${stool} ]; then $(MAKE) -s -C $(SIMULATION_ENV_DIR)/$${stool} clean; fi;\
 	done
 	@fpga_test_list=($(SUPPORTED_FPGA_TEST));\
 	for fidx in `seq 0 $$(($${#fpga_test_list[@]}-1))`; do\
 		ftest=$${fpga_test_list[$$fidx]};\
-		if [ -d $(FPGA_TEST_DIR)/$${ftest} ]; then $(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} clean; fi;\
-		if [ -d $(FPGA_TEST_DIR)/$${ftest}/simulation ]; then $(MAKE) -C $(FPGA_TEST_DIR)/$${ftest}/simulation clean; fi;\
+		if [ -d $(FPGA_TEST_DIR)/$${ftest} ]; then $(MAKE) -s -C $(FPGA_TEST_DIR)/$${ftest} clean; fi;\
+		if [ -d $(FPGA_TEST_DIR)/$${ftest}/simulation ]; then $(MAKE) -s -C $(FPGA_TEST_DIR)/$${ftest}/simulation clean; fi;\
 	done
 
 #H# env-dirs            : Create features environment directories (synthesis, fpga-test, simulation, etc.)
 env-dirs:
 	@if [[ "$(FPGA_TEST)" != "" ]]; then\
 		for ftest in $(FPGA_TEST); do\
-			$(MAKE) check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
+			$(MAKE) -s check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
 		done;\
 	fi
 
@@ -363,7 +370,7 @@ env-dirs:
 sv2v-srcs: $(SVERILOG_SRC)
 	@rm -rvf .sv2v/*
 	@mkdir -p $(SV2V_RTL_DIR)
-	@for src in $^; do $(MAKE) sv2v-convert SV2V_SOURCE=$${src}; done
+	@for src in $^; do $(MAKE) -s sv2v-convert SV2V_SOURCE=$${src}; done
 
 #H# sv2v-convert        : Convert SystemVerilog module to Verilog
 sv2v-convert: check-sv2v
@@ -409,17 +416,17 @@ help-all: help
 	@syn_tool_list=($(SUPPORTED_SYNTHESIS));\
 	for sidx in `seq 0 $$(($${#syn_tool_list[@]}-1))`; do\
 		stool=$${syn_tool_list[$$sidx]};\
-		if [ -d $(SYNTHESIS_ENV_DIR)/$${stool} ]; then $(MAKE) -C $(SYNTHESIS_ENV_DIR)/$${stool} help; fi;\
+		if [ -d $(SYNTHESIS_ENV_DIR)/$${stool} ]; then $(MAKE) -s -C $(SYNTHESIS_ENV_DIR)/$${stool} help; fi;\
 	done
 	@sim_tool_list=($(SUPPORTED_SIMULATION));\
 	for sidx in `seq 0 $$(($${#sim_tool_list[@]}-1))`; do\
 		stool=$${sim_tool_list[$$sidx]};\
-		if [ -d $(SIMULATION_ENV_DIR)/$${stool} ]; then $(MAKE) -C $(SIMULATION_ENV_DIR)/$${stool} help; fi;\
+		if [ -d $(SIMULATION_ENV_DIR)/$${stool} ]; then $(MAKE) -s -C $(SIMULATION_ENV_DIR)/$${stool} help; fi;\
 	done
 	@fpga_test_list=($(SUPPORTED_FPGA_TEST));\
 	for fidx in `seq 0 $$(($${#fpga_test_list[@]}-1))`; do\
 		ftest=$${fpga_test_list[$$fidx]};\
-		if [ -d $(FPGA_TEST_DIR)/$${ftest} ]; then $(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} help; fi;\
+		if [ -d $(FPGA_TEST_DIR)/$${ftest} ]; then $(MAKE) -s -C $(FPGA_TEST_DIR)/$${ftest} help; fi;\
 	done
 
 .PHONY: all lint lint-module rtl-synth rtl-sim fpga-test fpga-flash print-rtl-srcs print-config filelist env-dirs check-config veritedium clean clean-all del-bak help help-all
