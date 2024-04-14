@@ -140,18 +140,14 @@ veritedium:
 	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_flag_)Finished!$(_reset_)"; fi
 
 #H# lint                : Run the RTL code linter
-ifeq ("$(DW_VERBOSE)","yes")
 lint: print-rtl-srcs
-else
-lint:
-endif
 	@if [[ "$(TOP_MODULE)" == "" ]]; then\
 		echo -e "$(_error_)[ERROR] No defined top module!$(_reset_)";\
 		exit;\
 	else\
 		if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_info_)\n[INFO] Linting using $(LINT) tool$(_reset_)"; fi;\
 		for tmodule in $(TOP_MODULE); do\
-			$(MAKE) -s lint-module TOP_MODULE=$${tmodule};\
+			$(MAKE) lint-module TOP_MODULE=$${tmodule};\
 		done;\
 	fi
 
