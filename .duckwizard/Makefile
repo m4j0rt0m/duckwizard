@@ -168,7 +168,7 @@ rtl-synth-run:
 else
 rtl-synth:
 endif
-	@echo -e "$(_info_)\n[INFO] RTL Synthesis$(_reset_)";\
+	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_info_)\n[INFO] RTL Synthesis$(_reset_)"; fi;\
 	if [[ "$(RTL_SYN_TOOLS)" == "" ]]; then\
 		echo -e "$(_error_)[ERROR] No defined RTL synthesis tool! Define \"RTL_SYN_TOOLS\" environment variable or define it in the \"project.config\" file."$(_reset_);\
 	else\
@@ -178,12 +178,12 @@ endif
 			if [[ "$(TOP_MODULE)" == "" ]]; then\
 				echo -e "$(_error_)[ERROR] No defined top module!$(_reset_)";\
 			else\
-				echo -e "$(_info_)\n[INFO] Running $${stool} synthesis tool$(_reset_)";\
+				if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_info_)\n[INFO] Running $${stool} synthesis tool$(_reset_)"; fi;\
 				tmodule_list=($(TOP_MODULE));\
 				for tidx in `seq 0 $$(($${#tmodule_list[@]}-1))`; do\
 					tmodule=$${tmodule_list[$$tidx]};\
-					echo -e "$(_flag_)\n [*] Synthesis Top Module : $${tmodule}\n$(_reset_)";\
-					$(MAKE) -s -C $(SYNTHESIS_ENV_DIR)/$${stool} rtl-synth\
+					if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_flag_)\n [*] Synthesis Top Module : $${tmodule}\n$(_reset_)"; fi;\
+					$(MAKE) -C $(SYNTHESIS_ENV_DIR)/$${stool} rtl-synth\
 						TOP_MODULE=$${tmodule}\
 						SYN_BUILD_DIR="$(BUILD_DIR)/syn/$${stool}"\
 						VERILOG_SRC="$(VERILOG_SRC) $(SVERILOG_SRC)"\
@@ -198,7 +198,7 @@ endif
 
 #H# rtl-sim             : Run RTL simulation
 rtl-sim:
-	@echo -e "$(_info_)\n[INFO] RTL Simulation\n$(_reset_)";\
+	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_info_)\n[INFO] RTL Simulation\n$(_reset_)"; fi;\
 	if [[ "$(SIM_TOOL)" == "" ]]; then\
 		echo -e "$(_error_)[ERROR] No defined RTL simulation tool! Define \"SIM_TOOL\" environment variable or define it in the \"project.config\" file.$(_reset_)";\
 	else\
@@ -208,12 +208,12 @@ rtl-sim:
 			if [[ "$(SIM_MODULES)" == "" ]]; then\
 				echo -e "$(_error_)[ERROR] No defined simulation top module!$(_reset_)";\
 			else\
-				echo -e "$(_info_)[INFO] Simulation with $${stool} tool\n$(_reset_)";\
+				if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_info_)[INFO] Simulation with $${stool} tool\n$(_reset_)"; fi;\
 				smodule_list=($(SIM_MODULES));\
 				for sidx in `seq 0 $$(($${#smodule_list[@]}-1))`; do\
 					smodule=$${smodule_list[$$sidx]};\
-					echo -e "$(_flag_)\n [*] Simulating Top Module : $${smodule}\n$(_reset_)";\
-					$(MAKE) -s -C $(SIMULATION_ENV_DIR)/$${stool} sim\
+					if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_flag_)\n [*] Simulating Top Module : $${smodule}\n$(_reset_)"; fi;\
+					$(MAKE) -C $(SIMULATION_ENV_DIR)/$${stool} sim\
 						SIM_TOP_MODULE=$${smodule}\
 						SIM_TOOL=$${stool}\
 						SIM_SOURCE_DIR="$(TB_SOURCE_DIR)"\
@@ -234,7 +234,7 @@ rtl-sim:
 
 #H# fpga-test           : Run the FPGA test
 fpga-test:
-	@echo -e "$(_flag_)\n[INFO] FPGA Test$(_reset_)";\
+	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_flag_)\n[INFO] FPGA Test$(_reset_)"; fi;\
 	if [[ "$(FPGA_TEST)" == "" ]]; then\
 		echo -e "$(_error_)[ERROR] No defined FPGA test! Define it in the \"project.config\" file.$(_reset_)";\
 	else\
@@ -244,11 +244,13 @@ fpga-test:
 			$(MAKE) check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
 			fpga_target=$${ftest^^}_TARGET;\
 			fpga_device=$${ftest^^}_DEVICE;\
-			echo -e "$(_flag_)\n [*] Running compilation flow - $${ftest^}";\
-			echo -e "  |-> Target     : $${!fpga_target}";\
-			echo -e "  |-> Device     : $${!fpga_device}";\
-			echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
-			$(MAKE) -s -C $(FPGA_TEST_DIR)/$${ftest} $${ftest}-project\
+			if [[ "$(DW_VERBOSE)" == "yes" ]]; then\
+				echo -e "$(_flag_)\n [*] Running compilation flow - $${ftest^}";\
+				echo -e "  |-> Target     : $${!fpga_target}";\
+				echo -e "  |-> Device     : $${!fpga_device}";\
+				echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
+			fi;\
+			$(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} $${ftest}-project\
 				EXT_VERILOG_SRC="$(VERILOG_SRC) $(SVERILOG_SRC)"\
 				EXT_VERILOG_HEADERS="$(VERILOG_HEADERS) $(SVERILOG_HEADERS)"\
 				EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
@@ -259,7 +261,7 @@ fpga-test:
 
 #H# fpga-rtl-sim        : Run FPGA Test RTL simulation
 fpga-rtl-sim:
-	@echo -e "$(_info_)\n[INFO] FPGA Test Simulation\n$(_reset_)";\
+	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_info_)\n[INFO] FPGA Test Simulation\n$(_reset_)"; fi;\
 	if [[ "$(FPGA_SIM_TEST)" == "" ]]; then\
 		echo -e "$(_error_)[ERROR] No defined FPGA test simulation target! Define it in the \"project.config\" file.$(_reset_)";\
 	elif [[ "$(FPGA_SIM_TOOL)" == "" ]]; then\
@@ -298,11 +300,13 @@ fpga-flash:
 			$(MAKE) check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
 			fpga_target=$${ftest^^}_TARGET;\
 			fpga_device=$${ftest^^}_DEVICE;\
-			echo -e "$(_flag_)\n [*] Running flash FPGA job - $${ftest^}";\
-			echo -e "  |-> Target     : $${!fpga_target}";\
-			echo -e "  |-> Device     : $${!fpga_device}";\
-			echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
-			$(MAKE) -s -C $(FPGA_TEST_DIR)/$${ftest} $${ftest}-flash-fpga\
+			if [[ "$(DW_VERBOSE)" == "yes" ]]; then\
+				echo -e "$(_flag_)\n [*] Running flash FPGA job - $${ftest^}";\
+				echo -e "  |-> Target     : $${!fpga_target}";\
+				echo -e "  |-> Device     : $${!fpga_device}";\
+				echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
+			fi;\
+			$(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} $${ftest}-flash-fpga\
 				EXT_VERILOG_SRC="$(VERILOG_SRC) $(SVERILOG_SRC)"\
 				EXT_VERILOG_HEADERS="$(VERILOG_HEADERS) $(SVERILOG_HEADERS)"\
 				EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
@@ -319,10 +323,12 @@ lint-fpga-test:
 		ftest_list=($(FPGA_TEST));\
 		for fidx in `seq 0 $$(($${#ftest_list[@]}-1))`; do\
 			ftest=$${ftest_list[$$fidx]};\
-			$(MAKE) -s check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
-			echo -e "$(_flag_)\n [*] Running linter for $${ftest^} FPGA test";\
-			echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
-			$(MAKE) -s -C $(FPGA_TEST_DIR)/$${ftest} lint\
+			$(MAKE) check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
+			if [[ "$(DW_VERBOSE)" == "yes" ]]; then\
+				echo -e "$(_flag_)\n [*] Running linter for $${ftest^} FPGA test";\
+				echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
+			fi;\
+			$(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} lint\
 				EXT_VERILOG_SRC="$(VERILOG_SRC) $(SVERILOG_SRC)"\
 				EXT_VERILOG_HEADERS="$(VERILOG_HEADERS) $(SVERILOG_HEADERS)"\
 				EXT_PACKAGE_SRC="$(PACKAGE_SRC)"\
