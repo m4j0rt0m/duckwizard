@@ -78,6 +78,11 @@ include $(SCRIPTS_DIR)/funct.mk
 ### include flags ###
 INCLUDES_FLAGS          = $(addprefix -I, $(RTL_PATHS))
 
+### misc flags
+ifneq ("$(DW_VERBOSE)","yes")
+MAKEFLAGS              += -s
+endif
+
 ### linter flags ###
 VERILATOR_LINT          = verilator
 VERILATOR_LINT_SV_FLAGS = +1800-2017ext+sv -sv
