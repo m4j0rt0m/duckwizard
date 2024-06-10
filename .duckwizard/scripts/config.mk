@@ -79,6 +79,14 @@ FPGA_SIM_OPEN_WAVE                ?= $(shell $(PARSE_CONFIG) fpga_sim_open_wave)
 FPGA_SIM_MODULES_ALTERA           ?= $(shell $(PARSE_CONFIG) fpga_sim_modules_altera)
 # - fpga-rtl-sim-altera
 FPGA_SIM_MODULES_LATTICE          ?= $(shell $(PARSE_CONFIG) fpga_sim_modules_lattice)
+# - docker images
+DOCKER_VERILATOR                  ?= $(shell $(PARSE_CONFIG) docker_verilator)
+DOCKER_SPYGLASS                   ?= $(shell $(PARSE_CONFIG) docker_spyglass)
+DOCKER_ICESTORM                   ?= $(shell $(PARSE_CONFIG) docker_icestorm)
+DOCKER_IVERILOG                   ?= $(shell $(PARSE_CONFIG) docker_iverilog)
+DOCKER_QUARTUS                    ?= $(shell $(PARSE_CONFIG) docker_quartus)
+DOCKER_COLIBRI                    ?= $(shell $(PARSE_CONFIG) docker_colibri)
+DOCKER_RISCV_DEV                  ?= $(shell $(PARSE_CONFIG) docker_riscv_dev)
 
 ### export variables ###
 export CONFIG_FILE
@@ -128,6 +136,13 @@ export LATTICE_CLOCK_MHZ
 export LATTICE_PNR_TOOL
 export FPGA_SIM_MODULES_ALTERA
 export FPGA_SIM_MODULES_LATTICE
+export DOCKER_VERILATOR
+export DOCKER_SPYGLASS
+export DOCKER_ICESTORM
+export DOCKER_IVERILOG
+export DOCKER_QUARTUS
+export DOCKER_COLIBRI
+export DOCKER_RISCV_DEV
 
 #H# check-config        : Check project configuration
 check-config:
