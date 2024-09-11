@@ -407,7 +407,7 @@ upgrade-env:
 		cd duckwizard && git pull; \
 	else \
 		echo -e "$(_info_)[INFO] Cloning the duckWizard repository...$(_reset_)"; \
-		git clone https://github.com/m4j0rt0m/duckwizard.git; \
+		git clone https://github.com/m4j0rt0m/duckwizard.git -b tmp/test-upgrade; \
 	fi
 	@echo -e "$(_info_)[INFO] Merging project.config...$(_reset_)"
 	@if [ -f project.config ]; then \
