@@ -399,39 +399,47 @@ update-files:
 	cd .. && rm -rf .dw-temp-update
 
 #H# upgrade-env         : Upgrade the duckWizard environment (replaces "make update-files")
-# Rule to upgrade the duckWizard environment
 upgrade-env:
-	@echo -e "$(_info_)[INFO] Upgrading duckWizard environment...$(_reset_)"
-	@if [ -d duckwizard ]; then \
-		echo -e "$(_info_)[INFO] Updating the duckWizard repository...$(_reset_)"; \
-		cd duckwizard && git pull; \
+	@echo -e "$(_info_)[INFO] Upgrading duckWizard environment$(_reset_)"
+	@if [ ! -d duckwizard ]; then \
+		echo -e "$(_info_)[INFO] Cloning the duckWizard repository$(_reset_)"; \
+		git clone https://github.com/m4j0rt0m/duckwizard.git -b tmp/test-upgrade duckwizard; \
+		echo "NEW_DUCKWIZARD=1" > .duckwizard_created.tmp; \
 	else \
-		echo -e "$(_info_)[INFO] Cloning the duckWizard repository...$(_reset_)"; \
-		git clone https://github.com/m4j0rt0m/duckwizard.git -b tmp/test-upgrade; \
+		echo -e "$(_info_)[INFO] Updating the duckWizard repository$(_reset_)"; \
+		cd duckwizard && git pull; \
 	fi
-	@echo -e "$(_info_)[INFO] Merging project.config...$(_reset_)"
+	@echo -e "$(_info_)[INFO] Creating patch for .duckwizard$(_reset_)"
+	@diff -urN .duckwizard duckwizard/.duckwizard > duckwizard_patch.diff || true
+	@echo -e "$(_info_)[INFO] Applying patch to update .duckwizard$(_reset_)"
+	@patch -p1 < duckwizard_patch.diff || true
+	@rm duckwizard_patch.diff
+	@echo -e "$(_info_)[INFO] Backing up the current project.config$(_reset_)"
 	@if [ -f project.config ]; then \
-		diff -u project.config duckwizard/project.config > project_config.diff || true; \
-		if [ -s project_config.diff ]; then \
-			echo -e "$(_info_)[INFO] Differences found in project.config. Applying a merge...$(_reset_)"; \
-			mv project.config project.config.bak; \
-			cp duckwizard/project.config project.config; \
-			patch project.config < project_config.diff; \
-			rm project_config.diff; \
-			echo -e "$(_info_)[INFO] Merge complete! Your old configuration is backed up as project.config.bak$(_reset_)"; \
+		cp project.config project.config.bak; \
+		echo -e "$(_info_)[INFO] Performing three-way merge of project.config$(_reset_)"; \
+		diff3 -m project.config $(CONFIG_ORIG_FILE) duckwizard/project.config > merged_project.config || true; \
+		if grep -q '<<<<<<<' merged_project.config; then \
+			echo -e "$(_info_)[INFO] Merge conflicts detected in project.config. Please manually resolve them in project.config.conflicted.$(_reset_)"; \
+			mv merged_project.config project.config.conflicted; \
 		else \
-			echo -e "$(_info_)[INFO] No differences found in project.config.$(_reset_)"; \
-			rm project_config.diff; \
+			mv merged_project.config project.config; \
+			echo -e "$(_info_)[INFO] Merge complete. Updated project.config has been saved.$(_reset_)"; \
+			rm project.config.bak; \
 		fi; \
 	else \
 		echo -e "$(_info_)[INFO] No project.config found. Copying the new one from duckWizard.$(_reset_)"; \
 		cp duckwizard/project.config .; \
 	fi
-	@echo -e "$(_info_)[INFO] Ensuring all directories are up-to-date...$(_reset_)"
+	@if [ -f .duckwizard_created.tmp ]; then \
+		echo -e "$(_info_)[INFO] Removing temporary duckWizard repository$(_reset_)"; \
+		rm -rf duckwizard; \
+		rm .duckwizard_created.tmp; \
+	fi
+	@echo -e "$(_info_)[INFO] Ensuring all required directories are present$(_reset_)"
 	@mkdir -p src/rtl src/include src/mem src/package
 	@mkdir -p tb/rtl tb/include tb/mem tb/package tb/scripts tb/cxx
-	@mkdir -p build
-	@echo -e "$(_info_)[INFO] Environment upgrade complete!$(_reset_)"
+	@echo -e "$(_info_)[INFO] duckWizard environment upgrade complete!$(_reset_)"
 
 #H# help                : Display help
 help: $(DUCKWIZARD_DIR)/Makefile $(SCRIPTS_DIR)/misc.mk
