@@ -398,6 +398,41 @@ update-files:
 	.duckwizard/scripts/restore_config $(CONFIG_FILE) project.config && \
 	cd .. && rm -rf .dw-temp-update
 
+#H# upgrade-env         : Upgrade the duckWizard environment (replaces "make update-files")
+# Rule to upgrade the duckWizard environment
+upgrade-env:
+	@echo -e "$(_info_)[INFO] Upgrading duckWizard environment...$(_reset_)"
+	@if [ -d duckwizard ]; then \
+		echo -e "$(_info_)[INFO] Updating the duckWizard repository...$(_reset_)"; \
+		cd duckwizard && git pull; \
+	else \
+		echo -e "$(_info_)[INFO] Cloning the duckWizard repository...$(_reset_)"; \
+		git clone https://github.com/m4j0rt0m/duckwizard.git; \
+	fi
+	@echo -e "$(_info_)[INFO] Merging project.config...$(_reset_)"
+	@if [ -f project.config ]; then \
+		diff -u project.config duckwizard/project.config > project_config.diff || true; \
+		if [ -s project_config.diff ]; then \
+			echo -e "$(_info_)[INFO] Differences found in project.config. Applying a merge...$(_reset_)"; \
+			mv project.config project.config.bak; \
+			cp duckwizard/project.config project.config; \
+			patch project.config < project_config.diff; \
+			rm project_config.diff; \
+			echo -e "$(_info_)[INFO] Merge complete! Your old configuration is backed up as project.config.bak$(_reset_)"; \
+		else \
+			echo -e "$(_info_)[INFO] No differences found in project.config.$(_reset_)"; \
+			rm project_config.diff; \
+		fi; \
+	else \
+		echo -e "$(_info_)[INFO] No project.config found. Copying the new one from duckWizard.$(_reset_)"; \
+		cp duckwizard/project.config .; \
+	fi
+	@echo -e "$(_info_)[INFO] Ensuring all directories are up-to-date...$(_reset_)"
+	@mkdir -p src/rtl src/include src/mem src/package
+	@mkdir -p tb/rtl tb/include tb/mem tb/package tb/scripts tb/cxx
+	@mkdir -p build
+	@echo -e "$(_info_)[INFO] Environment upgrade complete!$(_reset_)"
+
 #H# help                : Display help
 help: $(DUCKWIZARD_DIR)/Makefile $(SCRIPTS_DIR)/misc.mk
 	@echo -e "\nHelp!...(8)\n"
