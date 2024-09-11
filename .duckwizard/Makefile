@@ -398,8 +398,7 @@ update-files:
 	.duckwizard/scripts/restore_config $(CONFIG_FILE) project.config && \
 	cd .. && rm -rf .dw-temp-update
 
-#H# upgrade-env         : Upgrade the duckWizard environment (replaces "make update-files")
-# Rule to upgrade the duckWizard environment
+#H# upgrade-env         : Upgrade the duckWizard environment using diff3 for project.config merge (replaces "make update-files")
 upgrade-env:
 	@echo -e "$(_info_)[INFO] Upgrading duckWizard environment...$(_reset_)"
 	@if [ -d duckwizard ]; then \
@@ -411,23 +410,26 @@ upgrade-env:
 	fi
 	@echo -e "$(_info_)[INFO] Merging project.config...$(_reset_)"
 	@if [ -f project.config ]; then \
-		diff -u project.config duckwizard/project.config > project_config.diff || true; \
-		if [ -s project_config.diff ]; then \
-			echo -e "$(_info_)[INFO] Differences found in project.config. Applying a merge...$(_reset_)"; \
-			mv project.config project.config.bak; \
-			cp duckwizard/project.config project.config; \
-			patch project.config < project_config.diff; \
-			rm project_config.diff; \
-			echo -e "$(_info_)[INFO] Merge complete! Your old configuration is backed up as project.config.bak$(_reset_)"; \
+		echo -e "$(_info_)[INFO] Backing up the current project.config...$(_reset_)"; \
+		cp project.config project.config.bak; \
+		if [ ! -f project.config.orig ]; then \
+			echo -e "$(_info_)[INFO] No original base config found. Using the current config as the base...$(_reset_)"; \
+			cp project.config project.config.orig; \
+		fi; \
+		echo -e "$(_info_)[INFO] Performing three-way merge of project.config...$(_reset_)"; \
+		diff3 -m project.config project.config.orig duckwizard/project.config > merged_project.config || true; \
+		if grep -q '<<<<<<<' merged_project.config; then \
+			echo -e "$(_info_)[INFO] Merge conflicts detected in project.config. Please manually resolve them in project.config.conflicted.$(_reset_)"; \
+			mv merged_project.config project.config.conflicted; \
 		else \
-			echo -e "$(_info_)[INFO] No differences found in project.config.$(_reset_)"; \
-			rm project_config.diff; \
+			mv merged_project.config project.config; \
+			echo -e "$(_info_)[INFO] Merge complete. Updated project.config has been saved.$(_reset_)"; \
 		fi; \
 	else \
-		echo -e "$(_info_)[INFO] No project.config found. Copying the new one from duckWizard.$(_reset_)"; \
+		echo -e "$(_info_)[INFO] No existing project.config found. Copying the new one from duckWizard.$(_reset_)"; \
 		cp duckwizard/project.config .; \
 	fi
-	@echo -e "$(_info_)[INFO] Ensuring all directories are up-to-date...$(_reset_)"
+	@echo -e "$(_info_)[INFO] Ensuring all required directories are present...$(_reset_)"
 	@mkdir -p src/rtl src/include src/mem src/package
 	@mkdir -p tb/rtl tb/include tb/mem tb/package tb/scripts tb/cxx
 	@mkdir -p build
