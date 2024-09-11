@@ -20,6 +20,7 @@
 [*] fpga_test = 
 [*] fpga_sim_test = 
 [*] fpga_sim_tool = 
+[*] new_cool_feature = 
 
 ---Specify filelist options
 ---(by default is "filelist.f" at root dir)
@@ -27,9 +28,11 @@
 ---(note... if set a prefix, remember to set the env variable ending with a "/", e.g. "export rtl_dir=${home}/cool_project/")
 [*] rtl_filelist = 
 [*] rtl_filelist_prefix = 
+[*] multiple_filelist = no
 
 ---Skip verilog / systemverilog sources (filenames with extension, separated by spaces)
 [*] skip_modules = 
+[*] override_rule = 
 
 ---Specify if a previous SystemVerilog to Verilog conversion is needed (some free synthesis tools don't have full SV support)
 [*] use_sv2v = no
@@ -47,6 +50,7 @@
 [*] rtl_linter_verilator_wno_flags = importstar fatal
 [*] rtl_linter_verilator_extra_flags = -Wall
 [*] rtl_linter_verilator_defines = 
+[*] rtl_linter_format = 
 
 ---Specify the RTL synthesis tool configuration (quartus / yosys / vivado (wip) / cadence (wip))
 ---and synthesis configuration for each tool
@@ -80,6 +84,7 @@
 [*] sim_questa_cycles = 
 [*] sim_questa_vlog_extra_flags = 
 [*] sim_questa_vsim_extra_flags = 
+[*] sim_questa_assertion_en = 
 
 ---Specify the FPGA test configuration
 [*] fpga_top = 
@@ -117,3 +122,4 @@
 
 ---Lattice FPGA RTL simulation configuration
 [*] fpga_sim_modules_lattice = 
+
