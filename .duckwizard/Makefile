@@ -409,6 +409,11 @@ upgrade-env:
 		echo -e "$(_info_)[INFO] Updating the duckWizard repository$(_reset_)"; \
 		cd duckwizard && git pull; \
 	fi
+	@echo -e "$(_info_)[INFO] Creating patch for .duckwizard$(_reset_)"
+	@diff -urN .duckwizard duckwizard/.duckwizard > duckwizard_patch.diff || true
+	@echo -e "$(_info_)[INFO] Applying patch to update .duckwizard$(_reset_)"
+	@patch -p1 < duckwizard_patch.diff || true
+	@rm duckwizard_patch.diff
 	@echo -e "$(_info_)[INFO] Backing up the current project.config$(_reset_)"
 	@if [ -f project.config ]; then \
 		cp project.config project.config.bak; \
@@ -420,8 +425,6 @@ upgrade-env:
 		else \
 			mv merged_project.config project.config; \
 			echo -e "$(_info_)[INFO] Merge complete. Updated project.config has been saved.$(_reset_)"; \
-			cp project.config $(CONFIG_ORIG_FILE); \
-			echo -e "$(_info_)[INFO] Updated $(CONFIG_ORIG_FILE) for future upgrades.$(_reset_)"; \
 			rm project.config.bak; \
 		fi; \
 	else \
