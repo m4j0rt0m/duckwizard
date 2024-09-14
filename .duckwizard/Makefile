@@ -443,7 +443,7 @@ upgrade-env:
 
 #H# init-env            : Initialize the duckWizard environment
 init-env:
-	@echo -e "$(_info_)[INFO] Initializing the environment$(_reset_)"s
+	@echo -e "$(_info_)[INFO] Initializing the environment$(_reset_)"
 	@mkdir -p src/rtl src/include src/mem src/package
 	@mkdir -p tb/rtl tb/include tb/mem tb/package tb/scripts tb/cxx
 	@echo -e "$(_info_)[INFO] Directories created:$(_reset_)"
