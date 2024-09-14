@@ -457,33 +457,33 @@ init-env:
 	@echo -e "  - tb/package  (Used for testbench packages: .sv)"
 	@echo -e "  - tb/scripts  (Used for testbench scripts)"
 	@echo -e "  - tb/cxx      (Used for C++ files in testbenches)"
-	FOUND=0
-	@if [ ! -d ./.duckwizard ]; then \
+	@FOUND=0; \
+	if [ ! -d ./.duckwizard ]; then \
 		cp -r ./duckwizard/.duckwizard ./.duckwizard; \
 		echo -e "$(_info_)[INFO] .duckwizard directory copied to the current directory$(_reset_)"; \
 	else \
 		echo -e "$(_info_)[INFO] .duckwizard directory already exists, skipping copy$(_reset_)"; \
 		FOUND=1; \
-	fi
-	@if [ ! -f ./project.config ]; then \
+	fi; \
+	if [ ! -f ./project.config ]; then \
 		cp ./duckwizard/project.config ./project.config; \
 		echo -e "$(_info_)[INFO] project.config file copied$(_reset_)"; \
 	else \
 		echo -e "$(_info_)[INFO] project.config already exists, skipping copy$(_reset_)"; \
 		FOUND=1; \
-	fi
-	@if [ ! -f ./Makefile ]; then \
+	fi; \
+	if [ ! -f ./Makefile ]; then \
 		cp ./duckwizard/Makefile ./Makefile; \
 		echo -e "$(_info_)[INFO] No Makefile found, copying default Makefile from duckwizard$(_reset_)"; \
 	else \
 		echo -e "$(_info_)[INFO] A Makefile already exists. Please ensure the following line is added to your Makefile to include the duckwizard Makefile:$(_reset_)"; \
 		echo -e "  include .duckwizard/Makefile"; \
-	fi
-	@if [ $${FOUND} -eq 1 ]; then \
+	fi; \
+	if [ $${FOUND} -eq 1 ]; then \
 		read -p "Do you want to upgrade the environment (y/n)? " ans && [ $${ans:-n} = y ] && \
 		make upgrade-env || echo -e "$(_info_)[INFO] Skipping environment upgrade$(_reset_)"; \
-	fi
-	@echo -e "$(_info_)[INFO] Environment initialization complete$(_reset_)"
+	fi; \
+	echo -e "$(_info_)[INFO] Environment initialization complete$(_reset_)"
 
 #H# help                : Display help
 help: $(DUCKWIZARD_DIR)/Makefile $(SCRIPTS_DIR)/misc.mk
