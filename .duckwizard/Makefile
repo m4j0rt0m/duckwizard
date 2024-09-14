@@ -398,6 +398,93 @@ update-files:
 	.duckwizard/scripts/restore_config $(CONFIG_FILE) project.config && \
 	cd .. && rm -rf .dw-temp-update
 
+#H# upgrade-env         : Upgrade the duckWizard environment (replaces "make update-files")
+upgrade-env:
+	@echo -e "$(_info_)[INFO] Upgrading duckWizard environment$(_reset_)"
+	@if [ ! -d duckwizard ]; then \
+		echo -e "$(_info_)[INFO] Cloning the duckWizard repository$(_reset_)"; \
+		git clone https://github.com/m4j0rt0m/duckwizard.git -b tmp/test-upgrade duckwizard; \
+		echo "NEW_DUCKWIZARD=1" > .duckwizard_created.tmp; \
+	else \
+		echo -e "$(_info_)[INFO] Updating the duckWizard repository$(_reset_)"; \
+		cd duckwizard && git pull; \
+	fi
+	@echo -e "$(_info_)[INFO] Creating patch for .duckwizard$(_reset_)"
+	@diff -urN .duckwizard duckwizard/.duckwizard > duckwizard_patch.diff || true
+	@echo -e "$(_info_)[INFO] Applying patch to update .duckwizard$(_reset_)"
+	@patch -p1 < duckwizard_patch.diff || true
+	@rm duckwizard_patch.diff
+	@echo -e "$(_info_)[INFO] Backing up the current project.config$(_reset_)"
+	@if [ -f project.config ]; then \
+		cp project.config project.config.bak; \
+		echo -e "$(_info_)[INFO] Performing three-way merge of project.config$(_reset_)"; \
+		diff3 -m project.config $(CONFIG_ORIG_FILE) duckwizard/project.config > merged_project.config || true; \
+		if grep -q '<<<<<<<' merged_project.config; then \
+			echo -e "$(_info_)[INFO] Merge conflicts detected in project.config. Please manually resolve them in project.config.conflicted.$(_reset_)"; \
+			mv merged_project.config project.config.conflicted; \
+		else \
+			mv merged_project.config project.config; \
+			echo -e "$(_info_)[INFO] Merge complete. Updated project.config has been saved.$(_reset_)"; \
+			rm project.config.bak; \
+		fi; \
+	else \
+		echo -e "$(_info_)[INFO] No project.config found. Copying the new one from duckWizard.$(_reset_)"; \
+		cp duckwizard/project.config .; \
+	fi
+	@if [ -f .duckwizard_created.tmp ]; then \
+		echo -e "$(_info_)[INFO] Removing temporary duckWizard repository$(_reset_)"; \
+		rm -rf duckwizard; \
+		rm .duckwizard_created.tmp; \
+	fi
+	@echo -e "$(_info_)[INFO] Ensuring all required directories are present$(_reset_)"
+	@mkdir -p src/rtl src/include src/mem src/package
+	@mkdir -p tb/rtl tb/include tb/mem tb/package tb/scripts tb/cxx
+	@echo -e "$(_info_)[INFO] duckWizard environment upgrade complete!$(_reset_)"
+
+#H# init-env            : Initialize the duckWizard environment
+init-env:
+	@echo -e "$(_info_)[INFO] Initializing the environment$(_reset_)"
+	@mkdir -p src/rtl src/include src/mem src/package
+	@mkdir -p tb/rtl tb/include tb/mem tb/package tb/scripts tb/cxx
+	@echo -e "$(_info_)[INFO] Directories created:$(_reset_)"
+	@echo -e "  - src/rtl     (Used for Verilog/SystemVerilog source files: .v, .sv)"
+	@echo -e "  - src/include (Used for header files: .h, .v, .vh, .sv, .svh)"
+	@echo -e "  - src/mem     (Used for memory initialization files: .bin, .hex)"
+	@echo -e "  - src/package (Used for SystemVerilog packages: .sv)"
+	@echo -e "  - tb/rtl      (Used for testbench Verilog/SystemVerilog source files: .v, .sv)"
+	@echo -e "  - tb/include  (Used for testbench headers: .h, .v, .vh, .sv, .svh)"
+	@echo -e "  - tb/mem      (Used for testbench memory initialization files: .bin, .hex)"
+	@echo -e "  - tb/package  (Used for testbench packages: .sv)"
+	@echo -e "  - tb/scripts  (Used for testbench scripts)"
+	@echo -e "  - tb/cxx      (Used for C++ files in testbenches)"
+	FOUND=0
+	@if [ ! -d ./.duckwizard ]; then \
+		cp -r ./duckwizard/.duckwizard ./.duckwizard; \
+		echo -e "$(_info_)[INFO] .duckwizard directory copied to the current directory$(_reset_)"; \
+	else \
+		echo -e "$(_info_)[INFO] .duckwizard directory already exists, skipping copy$(_reset_)"; \
+		FOUND=1; \
+	fi
+	@if [ ! -f ./project.config ]; then \
+		cp ./duckwizard/project.config ./project.config; \
+		echo -e "$(_info_)[INFO] project.config file copied$(_reset_)"; \
+	else \
+		echo -e "$(_info_)[INFO] project.config already exists, skipping copy$(_reset_)"; \
+		FOUND=1; \
+	fi
+	@if [ ! -f ./Makefile ]; then \
+		cp ./duckwizard/Makefile ./Makefile; \
+		echo -e "$(_info_)[INFO] No Makefile found, copying default Makefile from duckwizard$(_reset_)"; \
+	else \
+		echo -e "$(_info_)[INFO] A Makefile already exists. Please ensure the following line is added to your Makefile to include the duckwizard Makefile:$(_reset_)"; \
+		echo -e "  include .duckwizard/Makefile"; \
+	fi
+	@if [ $${FOUND} -eq 1 ]; then \
+		read -p "Do you want to upgrade the environment (y/n)? " ans && [ $${ans:-n} = y ] && \
+		make upgrade-env || echo -e "$(_info_)[INFO] Skipping environment upgrade$(_reset_)"; \
+	fi
+	@echo -e "$(_info_)[INFO] Environment initialization complete$(_reset_)"
+
 #H# help                : Display help
 help: $(DUCKWIZARD_DIR)/Makefile $(SCRIPTS_DIR)/misc.mk
 	@echo -e "\nHelp!...(8)\n"
