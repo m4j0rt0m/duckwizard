@@ -485,6 +485,10 @@ init-env:
 	fi; \
 	echo -e "$(_info_)[INFO] Environment initialization complete$(_reset_)"
 
+#H# check-duckwizard    : A friendly check to see if duckWizard is included
+check-duckwizard:
+	@echo "Hello, world! from duckWizard"
+
 #H# help                : Display help
 help: $(DUCKWIZARD_DIR)/Makefile $(SCRIPTS_DIR)/misc.mk
 	@echo -e "\nHelp!...(8)\n"
@@ -509,4 +513,4 @@ help-all: help
 		if [ -d $(FPGA_TEST_DIR)/$${ftest} ]; then $(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} help; fi;\
 	done
 
-.PHONY: all lint lint-module rtl-synth rtl-sim fpga-test fpga-flash print-rtl-srcs print-config filelist env-dirs check-config veritedium clean clean-all del-bak help help-all
+.PHONY: all lint lint-module rtl-synth rtl-sim fpga-test fpga-flash print-rtl-srcs print-config filelist env-dirs check-config veritedium clean clean-all del-bak help help-all check-duckwizard init-env upgrade-env
