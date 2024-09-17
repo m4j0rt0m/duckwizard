@@ -12,7 +12,7 @@ on:
       - develop
 
 jobs:
-  check-diff:
+  check-config:
     runs-on: ubuntu-latest
 
     steps:
