@@ -1,0 +1,39 @@
+name: Check Config
+
+# Triggers the workflow on push and pull request events on the main branch
+on:
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+    branches:
+      - master
+      - develop
+
+jobs:
+  check-diff:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the repository code
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Check if project.config and project.config.orig exist
+      - name: Check if config files exist
+        run: |
+          if [ ! -f project.config ] || [ ! -f .duckwizard/project.config.orig ]; then
+            echo "Either project.config or project.config.orig not found!"
+            exit 1
+          fi
+
+      # Check for differences between project.config and project.config.orig
+      - name: Check for differences
+        run: |
+          if diff project.config .duckwizard/project.config.orig > /dev/null; then
+            echo "No differences found between project.config and project.config.orig"
+          else
+            echo "Differences found between project.config and project.config.orig"
+            exit 1
+          fi
