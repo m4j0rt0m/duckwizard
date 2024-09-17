@@ -403,7 +403,7 @@ upgrade-env:
 	@echo -e "$(_info_)[INFO] Upgrading duckWizard environment$(_reset_)"
 	@if [ ! -d duckwizard ]; then \
 		echo -e "$(_info_)[INFO] Cloning the duckWizard repository$(_reset_)"; \
-		git clone https://github.com/m4j0rt0m/duckwizard.git -b tmp/test-upgrade duckwizard; \
+		git clone https://github.com/m4j0rt0m/duckwizard.git duckwizard; \
 		echo "NEW_DUCKWIZARD=1" > .duckwizard_created.tmp; \
 	else \
 		echo -e "$(_info_)[INFO] Updating the duckWizard repository$(_reset_)"; \
