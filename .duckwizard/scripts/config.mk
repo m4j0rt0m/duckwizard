@@ -2,6 +2,9 @@
 CONFIG_FILE                = $(TOP_DIR)/project.config
 PARSE_CONFIG               = $(SCRIPTS_DIR)/parse_config $(CONFIG_FILE)
 
+# original config file
+CONFIG_ORIG_FILE          := $(DUCKWIZARD_DIR)/project.config.orig
+
 ### project configuration ###
 PROJECT                           ?= $(shell $(PARSE_CONFIG) project)
 TOP_MODULE                        ?= $(shell $(PARSE_CONFIG) rtl_top)
