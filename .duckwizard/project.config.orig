@@ -21,9 +21,6 @@
 [*] fpga_sim_test = 
 [*] fpga_sim_tool = 
 
----Enable/Disable duckWizard print functions (yes/no)
-[*] verbose = no
-
 ---Specify filelist options
 ---(by default is "filelist.f" at root dir)
 ---(if specified a prefix for filelist generation, it will be added between ${}, e.g. rtl_dir --> ${rtl_dir})
