@@ -414,8 +414,16 @@ update-files:
 
 #H# help                : Display help
 help: $(DUCKWIZARD_DIR)/Makefile $(SCRIPTS_DIR)/misc.mk
-	@echo -e "\nHelp!...(8)\n"
+	@echo -e "\n[Help!...(8)]\n"
+	@echo -e "Commands:"
 	@sed -n 's/^#H#//p' $^
+	@echo ""
+	@$(MAKE) help-vars
+
+#H# help-vars           : Display environment variables
+help-vars: $(SCRIPTS_DIR)/config.mk
+	@echo -e "Variables:"
+	@sed -n 's/^#V#//p' $^
 	@echo ""
 
 #H# help-all            : Display complete rules help
