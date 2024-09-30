@@ -36,6 +36,7 @@ filelist-test-info:
 	@echo "filelist_base: '${FILELIST_BASE}'"
 
 #H# print-config        : Display project configuration
+ifeq ("$(DW_VERBOSE)","yes")
 print-config: check-config
 	@echo -e "$(_info_)\n[INFO] Project Configuration File$(_reset_)";\
 	echo -e "$(_segment_)";\
@@ -93,6 +94,9 @@ print-config: check-config
 		fi;\
 	fi;\
 	echo -e "$(_reset_)"
+else
+print-config: check-config ;
+endif
 
 #H# print-rtl-srcs      : Print RTL sources
 ifeq ("$(DW_VERBOSE)","yes")
