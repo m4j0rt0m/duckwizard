@@ -88,7 +88,7 @@ all: sim
 #H# sim             : Run simulation
 ifeq ($(USE_SV2V),yes)
 sim: sv2v-srcs-iverilog
-	$(MAKE) -s SV2V_RERUN=yes sim-sv2v
+	$(MAKE) SV2V_RERUN=yes sim-sv2v
 sim-sv2v: clean-top run-sim
 else
 sim: clean-top run-sim
@@ -96,13 +96,13 @@ endif
 
 #H# veritedium      : Run veritedium AUTO features
 veritedium:
-	@echo -e "$(_flag_)Running Veritedium Autocomplete..."
+	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_flag_)Running Veritedium Autocomplete..."; fi
 	@$(foreach SRC,$(VERILOG_SRC),$(call veritedium-command,$(SRC)))
 	@$(foreach SRC,$(SVERILOG_SRC),$(call veritedium-command,$(SRC)))
-	@echo -e "$(_flag_)Deleting unnecessary backup files (*~ or *.bak)..."
+	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_flag_)Deleting unnecessary backup files (*~ or *.bak)..."; fi
 	find ./* -name "*~" -delete
 	find ./* -name "*.bak" -delete
-	@echo -e "$(_flag_)Finished!$(_reset_)"
+	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_flag_)Finished!$(_reset_)"; fi
 
 run-sim: $(SIM_TB_FILE) $(RTL_OBJS)
 	$(SIM_RUN_VVP) $<
@@ -110,7 +110,7 @@ run-sim: $(SIM_TB_FILE) $(RTL_OBJS)
 		mv $(SIM_TOP_MODULE).vcd $(VCD_FILE);\
 		if [[ "$(SIM_OPEN_WAVE)" == "yes" ]]; then\
 			if [[ -f "$(GTK_FILE)" ]]; then\
-				echo -e "$(_info_)\n[INFO] Opening existing GTKW template...$(_reset_)";\
+				if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_info_)\n[INFO] Opening existing GTKW template...$(_reset_)"; fi;\
 				gtkwave $(GTK_FILE);\
 			else\
 				gtkwave $(VCD_FILE);\
