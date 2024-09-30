@@ -1,0 +1,122 @@
+----------------------------------------------------------------
+ File:         project.config
+ Description:  Project configuration file
+----------------------------------------------------------------
+
+---Project name and the rtl top module(s)
+[*] project = 
+[*] rtl_top = 
+
+---Project features (indicate them separated by spaces)
+---- Linter               : verilator | spyglass  |
+---- Synthesis            : quartus   | yosys     |
+---- Simulation           : iverilog  | questasim |
+---- FPGA test            : altera    | lattice   |
+---- FPGA simulation test : altera    | lattice   |
+---- FPGA simulation tool : iverilog  |           |
+[*] rtl_linter = 
+[*] rtl_synth_tools = 
+[*] sim_tool = 
+[*] fpga_test = 
+[*] fpga_sim_test = 
+[*] fpga_sim_tool = 
+
+---Enable/Disable duckWizard print functions (yes/no)
+[*] verbose = no
+
+---Specify filelist options
+---(by default is "filelist.f" at root dir)
+---(if specified a prefix for filelist generation, it will be added between ${}, e.g. rtl_dir --> ${rtl_dir})
+---(note... if set a prefix, remember to set the env variable ending with a "/", e.g. "export rtl_dir=${home}/cool_project/")
+[*] rtl_filelist = 
+[*] rtl_filelist_prefix = 
+
+---Skip verilog / systemverilog sources (filenames with extension, separated by spaces)
+[*] skip_modules = 
+
+---Specify if a previous SystemVerilog to Verilog conversion is needed (some free synthesis tools don't have full SV support)
+[*] use_sv2v = no
+
+---Specify the RTL linter configuration (verilator / spyglass) (remote option only for spyglass)
+[*] rtl_linter_license = 
+[*] rtl_linter_remote = 
+[*] rtl_linter_remote_ip = 
+[*] rtl_linter_env_source = 
+
+---Specify some extra verilator features below
+---(to disable some warnings messages, add them in the "wno_flags" field below, without the "-Wno-" prefix)
+---(for any other extra flags, use the "extra_flags" field)
+---(for some definitions, use the "defines" field, this will be added as "-D<define>")
+[*] rtl_linter_verilator_wno_flags = importstar fatal
+[*] rtl_linter_verilator_extra_flags = -Wall
+[*] rtl_linter_verilator_defines = 
+
+---Specify the RTL synthesis tool configuration (quartus / yosys / vivado (wip) / cadence (wip))
+---and synthesis configuration for each tool
+[*] rtl_synth_uses_clk = yes
+[*] rtl_synth_clk_src = clk
+[*] rtl_synth_quartus_target = Cyclone IV
+[*] rtl_synth_quartus_device = EP4CE22F17C6
+[*] rtl_synth_quartus_clk_mhz = 50
+[*] rtl_synth_yosys_target = ice40
+[*] rtl_synth_yosys_device = hx8k
+[*] rtl_synth_yosys_clk_mhz = 12
+[*] rtl_synth_yosys_pnr_tool = nextpnr
+
+---Specify the simulation tool configuration
+[*] sim_modules = 
+[*] sim_create_vcd = no
+[*] sim_open_wave = no
+
+---Skip verilog / systemverilog simulation sources (filenames with extension, separated by spaces)
+[*] skip_sim_modules = 
+
+---QuestaSim options
+---(add -c to "mode" for cli option, leave it blank for gui option)
+---(to specify a wave "do" file, add it in the "wave_do" field below)
+---(note... the wave "do" file should be inside of "tb/scripts")
+---(to specify an amount of cycles, add it in "cycles", default as "-all")
+---(it can be added other vlog and vsim flags below)
+---(for "defines", add them in "vlog_extra_flags", specific "defines" field is wip)
+[*] sim_questa_mode = -c
+[*] sim_questa_wave_do = 
+[*] sim_questa_cycles = 
+[*] sim_questa_vlog_extra_flags = 
+[*] sim_questa_vsim_extra_flags = 
+
+---Specify the FPGA test configuration
+[*] fpga_top = 
+[*] fpga_virtual_pins = yes
+[*] fpga_board_test = no
+[*] fpga_uses_clk = yes
+[*] fpga_clk_src = clk
+[*] fpga_synth_altera = yes
+[*] fpga_synth_lattice = yes
+
+---Altera FPGA configuration
+[*] fpga_altera_target = Cyclone IV
+[*] fpga_altera_device = EP4CE22F17C6
+[*] fpga_altera_package = normal
+[*] fpga_altera_min_temp = 0
+[*] fpga_altera_max_temp = 85
+[*] fpga_altera_clk_mhz = 50
+
+---Lattice FPGA configuration
+[*] fpga_lattice_target = ice40
+[*] fpga_lattice_device = up5k
+[*] fpga_lattice_package = sg48
+[*] fpga_lattice_clk_mhz = 12
+[*] fpga_lattice_pnr_tool = nextpnr
+
+---Xilinx FPGA configuration (wip)
+
+---FPGA RTL simulation configuration
+[*] fpga_sim_inc_main_sim_dir = yes
+[*] fpga_sim_create_vcd = yes
+[*] fpga_sim_open_wave = no
+
+---Altera FPGA RTL simulation configuration
+[*] fpga_sim_modules_altera = 
+
+---Lattice FPGA RTL simulation configuration
+[*] fpga_sim_modules_lattice = 
