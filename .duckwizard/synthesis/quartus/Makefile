@@ -84,7 +84,7 @@ $(Q_PROJECT_FILES): $(Q_CREATE_PROJECT_TCL)
 endif
 
 $(RPT_OBJS): $(RTL_OBJS)
-	@$(MAKE) quartus-create-project
+	@$(MAKE) -s quartus-create-project
 	@cd $(BUILD_DIR);\
 	$(QUARTUS_SH) --flow compile $(PROJECT)
 

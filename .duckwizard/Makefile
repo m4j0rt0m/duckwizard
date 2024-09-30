@@ -78,6 +78,11 @@ include $(SCRIPTS_DIR)/funct.mk
 ### include flags ###
 INCLUDES_FLAGS          = $(addprefix -I, $(RTL_PATHS))
 
+### misc flags
+ifneq ("$(DW_VERBOSE)","yes")
+MAKEFLAGS              += -s
+endif
+
 ### linter flags ###
 VERILATOR_LINT          = verilator
 VERILATOR_LINT_SV_FLAGS = +1800-2017ext+sv -sv
@@ -126,20 +131,21 @@ all: lint rtl-synth rtl-sim fpga-test
 
 #H# veritedium          : Run veritedium AUTO features
 veritedium:
-	@echo -e "$(_flag_)Running Veritedium Autocomplete..."
+	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_flag_)Running Veritedium Autocomplete..."; fi
 	@$(foreach SRC,$(VERILOG_SRC),$(call veritedium-command,$(SRC)))
 	@$(foreach SRC,$(SVERILOG_SRC),$(call veritedium-command,$(SRC)))
-	@echo -e "$(_flag_)Deleting unnecessary backup files (*~ or *.bak)..."
-	find ./* -name "*~" -delete
-	find ./* -name "*.bak" -delete
-	@echo -e "$(_flag_)Finished!$(_reset_)"
+	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_flag_)Deleting unnecessary backup files (*~ or *.bak)..."; fi
+	@find ./* -name "*~" -delete
+	@find ./* -name "*.bak" -delete
+	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_flag_)Finished!$(_reset_)"; fi
 
 #H# lint                : Run the RTL code linter
 lint: print-rtl-srcs
 	@if [[ "$(TOP_MODULE)" == "" ]]; then\
 		echo -e "$(_error_)[ERROR] No defined top module!$(_reset_)";\
+		exit;\
 	else\
-		echo -e "$(_info_)\n[INFO] Linting using $(LINT) tool$(_reset_)";\
+		if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_info_)\n[INFO] Linting using $(LINT) tool$(_reset_)"; fi;\
 		for tmodule in $(TOP_MODULE); do\
 			$(MAKE) lint-module TOP_MODULE=$${tmodule};\
 		done;\
@@ -147,9 +153,11 @@ lint: print-rtl-srcs
 
 #H# lint-module         : Run pre-specified linter for <top module>, use 'make lint' instead
 lint-module:
-	@echo -e "$(_flag_)\n [+] Top Module : [ $(TOP_MODULE) ]\n$(_reset_)";\
-	echo "$(RTL_LINTER)";\
-	echo -e "$(_flag_) cmd: $(LINT) $(LINT_FLAGS)\n$(_reset_)";\
+	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then\
+		echo -e "$(_flag_)\n [+] Top Module : [ $(TOP_MODULE) ]\n$(_reset_)";\
+		echo "$(RTL_LINTER)";\
+		echo -e "$(_flag_) cmd: $(LINT) $(LINT_FLAGS)\n$(_reset_)";\
+	fi;\
 	$(LINT) $(LINT_FLAGS);\
 
 #H# rtl-synth           : Run RTL synthesis
@@ -160,7 +168,7 @@ rtl-synth-run:
 else
 rtl-synth:
 endif
-	@echo -e "$(_info_)\n[INFO] RTL Synthesis$(_reset_)";\
+	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_info_)\n[INFO] RTL Synthesis$(_reset_)"; fi;\
 	if [[ "$(RTL_SYN_TOOLS)" == "" ]]; then\
 		echo -e "$(_error_)[ERROR] No defined RTL synthesis tool! Define \"RTL_SYN_TOOLS\" environment variable or define it in the \"project.config\" file."$(_reset_);\
 	else\
@@ -170,11 +178,11 @@ endif
 			if [[ "$(TOP_MODULE)" == "" ]]; then\
 				echo -e "$(_error_)[ERROR] No defined top module!$(_reset_)";\
 			else\
-				echo -e "$(_info_)\n[INFO] Running $${stool} synthesis tool$(_reset_)";\
+				if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_info_)\n[INFO] Running $${stool} synthesis tool$(_reset_)"; fi;\
 				tmodule_list=($(TOP_MODULE));\
 				for tidx in `seq 0 $$(($${#tmodule_list[@]}-1))`; do\
 					tmodule=$${tmodule_list[$$tidx]};\
-					echo -e "$(_flag_)\n [*] Synthesis Top Module : $${tmodule}\n$(_reset_)";\
+					if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_flag_)\n [*] Synthesis Top Module : $${tmodule}\n$(_reset_)"; fi;\
 					$(MAKE) -C $(SYNTHESIS_ENV_DIR)/$${stool} rtl-synth\
 						TOP_MODULE=$${tmodule}\
 						SYN_BUILD_DIR="$(BUILD_DIR)/syn/$${stool}"\
@@ -190,7 +198,7 @@ endif
 
 #H# rtl-sim             : Run RTL simulation
 rtl-sim:
-	@echo -e "$(_info_)\n[INFO] RTL Simulation\n$(_reset_)";\
+	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_info_)\n[INFO] RTL Simulation\n$(_reset_)"; fi;\
 	if [[ "$(SIM_TOOL)" == "" ]]; then\
 		echo -e "$(_error_)[ERROR] No defined RTL simulation tool! Define \"SIM_TOOL\" environment variable or define it in the \"project.config\" file.$(_reset_)";\
 	else\
@@ -200,11 +208,11 @@ rtl-sim:
 			if [[ "$(SIM_MODULES)" == "" ]]; then\
 				echo -e "$(_error_)[ERROR] No defined simulation top module!$(_reset_)";\
 			else\
-				echo -e "$(_info_)[INFO] Simulation with $${stool} tool\n$(_reset_)";\
+				if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_info_)[INFO] Simulation with $${stool} tool\n$(_reset_)"; fi;\
 				smodule_list=($(SIM_MODULES));\
 				for sidx in `seq 0 $$(($${#smodule_list[@]}-1))`; do\
 					smodule=$${smodule_list[$$sidx]};\
-					echo -e "$(_flag_)\n [*] Simulating Top Module : $${smodule}\n$(_reset_)";\
+					if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_flag_)\n [*] Simulating Top Module : $${smodule}\n$(_reset_)"; fi;\
 					$(MAKE) -C $(SIMULATION_ENV_DIR)/$${stool} sim\
 						SIM_TOP_MODULE=$${smodule}\
 						SIM_TOOL=$${stool}\
@@ -226,7 +234,7 @@ rtl-sim:
 
 #H# fpga-test           : Run the FPGA test
 fpga-test:
-	@echo -e "$(_flag_)\n[INFO] FPGA Test$(_reset_)";\
+	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_flag_)\n[INFO] FPGA Test$(_reset_)"; fi;\
 	if [[ "$(FPGA_TEST)" == "" ]]; then\
 		echo -e "$(_error_)[ERROR] No defined FPGA test! Define it in the \"project.config\" file.$(_reset_)";\
 	else\
@@ -236,10 +244,12 @@ fpga-test:
 			$(MAKE) check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
 			fpga_target=$${ftest^^}_TARGET;\
 			fpga_device=$${ftest^^}_DEVICE;\
-			echo -e "$(_flag_)\n [*] Running compilation flow - $${ftest^}";\
-			echo -e "  |-> Target     : $${!fpga_target}";\
-			echo -e "  |-> Device     : $${!fpga_device}";\
-			echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
+			if [[ "$(DW_VERBOSE)" == "yes" ]]; then\
+				echo -e "$(_flag_)\n [*] Running compilation flow - $${ftest^}";\
+				echo -e "  |-> Target     : $${!fpga_target}";\
+				echo -e "  |-> Device     : $${!fpga_device}";\
+				echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
+			fi;\
 			$(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} $${ftest}-project\
 				EXT_VERILOG_SRC="$(VERILOG_SRC) $(SVERILOG_SRC)"\
 				EXT_VERILOG_HEADERS="$(VERILOG_HEADERS) $(SVERILOG_HEADERS)"\
@@ -251,7 +261,7 @@ fpga-test:
 
 #H# fpga-rtl-sim        : Run FPGA Test RTL simulation
 fpga-rtl-sim:
-	@echo -e "$(_info_)\n[INFO] FPGA Test Simulation\n$(_reset_)";\
+	@if [[ "$(DW_VERBOSE)" == "yes" ]]; then echo -e "$(_info_)\n[INFO] FPGA Test Simulation\n$(_reset_)"; fi;\
 	if [[ "$(FPGA_SIM_TEST)" == "" ]]; then\
 		echo -e "$(_error_)[ERROR] No defined FPGA test simulation target! Define it in the \"project.config\" file.$(_reset_)";\
 	elif [[ "$(FPGA_SIM_TOOL)" == "" ]]; then\
@@ -290,10 +300,12 @@ fpga-flash:
 			$(MAKE) check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
 			fpga_target=$${ftest^^}_TARGET;\
 			fpga_device=$${ftest^^}_DEVICE;\
-			echo -e "$(_flag_)\n [*] Running flash FPGA job - $${ftest^}";\
-			echo -e "  |-> Target     : $${!fpga_target}";\
-			echo -e "  |-> Device     : $${!fpga_device}";\
-			echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
+			if [[ "$(DW_VERBOSE)" == "yes" ]]; then\
+				echo -e "$(_flag_)\n [*] Running flash FPGA job - $${ftest^}";\
+				echo -e "  |-> Target     : $${!fpga_target}";\
+				echo -e "  |-> Device     : $${!fpga_device}";\
+				echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
+			fi;\
 			$(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} $${ftest}-flash-fpga\
 				EXT_VERILOG_SRC="$(VERILOG_SRC) $(SVERILOG_SRC)"\
 				EXT_VERILOG_HEADERS="$(VERILOG_HEADERS) $(SVERILOG_HEADERS)"\
@@ -312,8 +324,10 @@ lint-fpga-test:
 		for fidx in `seq 0 $$(($${#ftest_list[@]}-1))`; do\
 			ftest=$${ftest_list[$$fidx]};\
 			$(MAKE) check-dir-env RTL_ENV_FEATURE=fpga RTL_ENV_SUBFEATURE=$${ftest};\
-			echo -e "$(_flag_)\n [*] Running linter for $${ftest^} FPGA test";\
-			echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
+			if [[ "$(DW_VERBOSE)" == "yes" ]]; then\
+				echo -e "$(_flag_)\n [*] Running linter for $${ftest^} FPGA test";\
+				echo -e "  |-> Top Module : $(FPGA_TOP_MODULE)\n$(_reset_)";\
+			fi;\
 			$(MAKE) -C $(FPGA_TEST_DIR)/$${ftest} lint\
 				EXT_VERILOG_SRC="$(VERILOG_SRC) $(SVERILOG_SRC)"\
 				EXT_VERILOG_HEADERS="$(VERILOG_HEADERS) $(SVERILOG_HEADERS)"\
@@ -491,8 +505,16 @@ check-duckwizard:
 
 #H# help                : Display help
 help: $(DUCKWIZARD_DIR)/Makefile $(SCRIPTS_DIR)/misc.mk
-	@echo -e "\nHelp!...(8)\n"
+	@echo -e "\n[Help!...(8)]\n"
+	@echo -e "Commands:"
 	@sed -n 's/^#H#//p' $^
+	@echo ""
+	@$(MAKE) help-vars
+
+#H# help-vars           : Display environment variables
+help-vars: $(SCRIPTS_DIR)/config.mk
+	@echo -e "Variables:"
+	@sed -n 's/^#V#//p' $^
 	@echo ""
 
 #H# help-all            : Display complete rules help

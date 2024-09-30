@@ -95,16 +95,24 @@ print-config: check-config
 	echo -e "$(_reset_)"
 
 #H# print-rtl-srcs      : Print RTL sources
+ifeq ("$(DW_VERBOSE)","yes")
 print-rtl-srcs:
 	$(call print-srcs-command)
+else
+print-rtl-srcs: ;
+endif
 
 #H# print-pkgs          : Print SV Packages source list (hierarchically ordered)
+ifeq ("$(DW_VERBOSE)","yes")
 print-pkgs:
 	@list_pkg=($(PACKAGE_SRC));\
 	for idx in `seq 0 $$(($${#list_pkg[@]}-1))`; do\
 		pkg_src=$${list_pkg[$$idx]};\
 		echo "$${pkg_src}";\
 	done
+else
+print-pkgs: ;
+endif
 
 #H# print-pkgs-line     : Print SV Packages source in a single line (hierarchically ordered)
 print-pkgs-line:
@@ -128,6 +136,7 @@ install-sv2v:
 	@$(SCRIPTS_DIR)/install-sv2v
 
 #H# show-dirs           : Show automatically recognized rtl directories
+ifeq ("$(DW_VERBOSE)","yes")
 show-dirs:
 	@rtl_dirs_list=($(RTL_DIRS));\
 	inc_dirs_list=($(INCLUDE_DIRS));\
@@ -160,6 +169,9 @@ show-dirs:
 			echo -e "[$$idx] $${rtl_path}";\
 	done;\
 	echo -e "TOP MODULE: $(TOP_MODULE)"
+else
+show-dirs: ;
+endif
 
 #H# update-commit-file  : Update commit hash file
 update-commit-file:
